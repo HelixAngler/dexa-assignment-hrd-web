@@ -29,4 +29,13 @@ export const en: Record<DictKey, string> = {
   'state.empty.description': 'There is nothing to show here yet.',
   'state.success.default': 'Changes saved successfully.',
   'state.success.dismiss': 'Dismiss notification',
+
+  // Profile-change alert banners
+  'alert.regionLabel': 'Profile change alerts',
+  'alert.changedFields': 'changed {fields}',
+  'alert.passwordLine': 'Password changed',
+  'alert.dismiss': 'Dismiss alert',
+  'alert.field.phone': 'phone',
+  'alert.field.photo': 'photo',
+  'alert.field.password': 'password',
 };

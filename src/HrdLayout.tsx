@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
+import { AlertBanner } from './components';
 import type { DictKey } from './i18n/id';
 import { LanguageToggle, useI18n } from './i18n/provider';
 
@@ -18,8 +19,8 @@ const navLinkClassName = ({ isActive }: { isActive: boolean }): string =>
   ].join(' ');
 
 /**
- * Shell for the HRD admin area: header, navigation and an empty slot where
- * alert banners are rendered above the routed page content.
+ * Shell for the HRD admin area: header, navigation and the alert-banner
+ * strip rendered above the routed page content.
  */
 export default function HrdLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -77,8 +78,13 @@ export default function HrdLayout() {
         )}
       </header>
 
-      {/* Empty slot reserved for alert banners; routed pages render below it. */}
-      <div data-testid="banner-region" />
+      {/* Full-width strip right below the header: on phones the banners sit
+          above the page content, on desktop they span the top of the console.
+          Banners live in normal document flow, so navigation and page content
+          stay clickable underneath them. */}
+      <div data-testid="banner-region" className="w-full">
+        <AlertBanner />
+      </div>
 
       <main className="mx-auto max-w-6xl px-4 py-6">
         <Outlet />

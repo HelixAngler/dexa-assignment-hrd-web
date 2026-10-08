@@ -1,9 +1,10 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { id } from './i18n/id';
 import { I18nProvider } from './i18n/provider';
+import type { AlertProjection } from './services/alerts';
 import HrdLayout from './HrdLayout';
 
 function renderLayout() {
@@ -16,9 +17,40 @@ function renderLayout() {
   );
 }
 
+/**
+ * Routes only the recent-alerts pull; the realtime token endpoint answers
+ * with a server error so no transport is built during a layout test.
+ */
+function stubRecentAlerts(alerts: AlertProjection[]) {
+  const mock = vi.fn(async (input: RequestInfo | URL) => {
+    const url = String(input);
+    if (url.startsWith('/api/notification/alerts/recent')) {
+      return new Response(JSON.stringify({ alerts }), { status: 200 });
+    }
+    return new Response(JSON.stringify({ message: 'unavailable' }), {
+      status: 503,
+    });
+  });
+  vi.stubGlobal('fetch', mock);
+  return mock;
+}
+
+const layoutAlert: AlertProjection = {
+  alertId: 'evt-layout-1',
+  employeeId: 'emp-1',
+  employeeName: 'Cleo R.',
+  changedFields: ['phone'],
+  passwordChanged: false,
+  occurredAt: '2026-10-07T10:12:33Z',
+};
+
 describe('HrdLayout', () => {
   beforeEach(() => {
     window.localStorage.clear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('renders the shell with an empty banner region above the outlet', () => {
@@ -87,5 +119,26 @@ describe('HrdLayout', () => {
       within(desktopNav).getByRole('link', { name: 'Attendance' }),
     ).toBeTruthy();
     expect(window.localStorage.getItem('lang')).toBe('en');
+  });
+
+  it('keeps a full-width banner strip directly under the header and above the page', () => {
+    renderLayout();
+
+    const bannerRegion = screen.getByTestId('banner-region');
+    expect(bannerRegion).toHaveClass('w-full');
+    expect(bannerRegion.previousElementSibling?.tagName).toBe('HEADER');
+    expect(bannerRegion.nextElementSibling?.tagName).toBe('MAIN');
+  });
+
+  it('renders pulled alerts inside the banner region as a responsive strip', async () => {
+    stubRecentAlerts([layoutAlert]);
+
+    renderLayout();
+
+    const bannerRegion = screen.getByTestId('banner-region');
+    const list = await within(bannerRegion).findByTestId('alert-banner-list');
+    expect(list).toHaveTextContent(layoutAlert.employeeName);
+    expect(list).toHaveClass('flex-col');
+    expect(list).toHaveClass('md:flex-row');
   });
 });

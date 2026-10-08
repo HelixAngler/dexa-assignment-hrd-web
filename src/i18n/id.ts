@@ -27,6 +27,15 @@ export const id = {
   'state.empty.description': 'Belum ada yang bisa ditampilkan di sini.',
   'state.success.default': 'Perubahan berhasil disimpan.',
   'state.success.dismiss': 'Tutup notifikasi',
+
+  // Profile-change alert banners
+  'alert.regionLabel': 'Notifikasi perubahan profil',
+  'alert.changedFields': 'mengubah {fields}',
+  'alert.passwordLine': 'Kata sandi diubah',
+  'alert.dismiss': 'Tutup notifikasi',
+  'alert.field.phone': 'nomor telepon',
+  'alert.field.photo': 'foto',
+  'alert.field.password': 'kata sandi',
 } as const;
 
 /** Every legal translation key, derived from the complete (Indonesian) dictionary. */
