@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from '../App';
 import { id } from '../i18n/id';
 import { I18nProvider } from '../i18n/provider';
+import * as attendanceService from '../services/attendance';
 import * as authService from '../services/auth';
 import * as employeesService from '../services/employees';
 import { SessionProvider } from '../services/session';
@@ -18,6 +19,11 @@ vi.mock('../services/auth', async (importOriginal) => {
     logout: vi.fn(),
     setFirstPassword: vi.fn(),
   };
+});
+
+vi.mock('../services/attendance', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../services/attendance')>();
+  return { ...actual, fetchAttendance: vi.fn() };
 });
 
 vi.mock('../services/employees', () => ({
@@ -68,6 +74,8 @@ describe('route table', () => {
     vi.mocked(employeesService.fetchEmployeeById).mockReset();
     vi.mocked(employeesService.fetchEmployeeById).mockResolvedValue(null);
     vi.mocked(authService.fetchSession).mockResolvedValue(hrdSession);
+    vi.mocked(attendanceService.fetchAttendance).mockReset();
+    vi.mocked(attendanceService.fetchAttendance).mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -104,7 +112,15 @@ describe('route table', () => {
 
   it('renders the attendance page at /absensi', async () => {
     renderAt('/absensi');
+
     expect(await screen.findByTestId('absensi')).toBeTruthy();
+    expect(await screen.findByTestId('absensi-readonly')).toHaveTextContent(
+      id['absensi.readOnlyNote'],
+    );
+    expect(attendanceService.fetchAttendance).toHaveBeenCalledWith({
+      date: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+      q: '',
+    });
   });
 
   it('sends unknown paths to the Karyawan list', async () => {
@@ -124,6 +140,8 @@ describe('session routing policy', () => {
     vi.mocked(employeesService.listEmployees).mockResolvedValue([]);
     vi.mocked(employeesService.fetchEmployeeById).mockReset();
     vi.mocked(employeesService.fetchEmployeeById).mockResolvedValue(null);
+    vi.mocked(attendanceService.fetchAttendance).mockReset();
+    vi.mocked(attendanceService.fetchAttendance).mockResolvedValue([]);
   });
 
   afterEach(() => {

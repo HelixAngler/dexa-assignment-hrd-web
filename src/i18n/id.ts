@@ -132,6 +132,26 @@ export const id = {
   'toast.karyawan.statusChanged': 'Status karyawan berhasil diperbarui.',
   'toast.karyawan.passwordReset': 'Kata sandi berhasil diatur ulang.',
 
+  // Absensi: HRD read-only attendance view
+  'absensi.title': 'Absensi',
+  'absensi.readOnlyNote':
+    'Tampilan hanya-baca. Data absensi di halaman ini tidak dapat diubah.',
+  'absensi.dateLabel': 'Tanggal',
+  'absensi.searchLabel': 'Cari nama',
+  'absensi.searchSubmit': 'Cari',
+  'absensi.emptyTitle': 'Belum ada data absensi',
+  'absensi.emptyDescription':
+    'Tidak ada karyawan yang cocok dengan tanggal atau pencarian ini.',
+  'absensi.error.dateInvalid': 'Tanggal tidak valid. Silakan pilih tanggal lain.',
+  'absensi.column.name': 'Nama',
+  'absensi.column.masuk': 'Masuk',
+  'absensi.column.pulang': 'Pulang',
+  'absensi.column.status': 'Status',
+  'absensi.row.stillWorking': '(masih bekerja)',
+  'absensi.row.status.done': 'Selesai',
+  'absensi.row.status.open': 'Sedang bekerja',
+  'absensi.row.status.noPunch': 'Belum ada absen',
+
   // Profile-change alert banners
   'alert.regionLabel': 'Notifikasi perubahan profil',
   'alert.changedFields': 'mengubah {fields}',

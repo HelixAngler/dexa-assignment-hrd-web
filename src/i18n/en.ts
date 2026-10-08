@@ -132,6 +132,26 @@ export const en: Record<DictKey, string> = {
   'toast.karyawan.statusChanged': 'Employee status updated.',
   'toast.karyawan.passwordReset': 'Password reset successfully.',
 
+  // Attendance: HRD read-only attendance view
+  'absensi.title': 'Attendance',
+  'absensi.readOnlyNote':
+    'Read-only view. The attendance data on this page cannot be changed.',
+  'absensi.dateLabel': 'Date',
+  'absensi.searchLabel': 'Search by name',
+  'absensi.searchSubmit': 'Search',
+  'absensi.emptyTitle': 'No attendance records yet',
+  'absensi.emptyDescription':
+    'No employees match this date or this name search.',
+  'absensi.error.dateInvalid': 'That date is not valid. Please pick another one.',
+  'absensi.column.name': 'Name',
+  'absensi.column.masuk': 'Clock in',
+  'absensi.column.pulang': 'Clock out',
+  'absensi.column.status': 'Status',
+  'absensi.row.stillWorking': '(still working)',
+  'absensi.row.status.done': 'Done',
+  'absensi.row.status.open': 'Working',
+  'absensi.row.status.noPunch': 'No punch yet',
+
   // Profile-change alert banners
   'alert.regionLabel': 'Profile change alerts',
   'alert.changedFields': 'changed {fields}',
