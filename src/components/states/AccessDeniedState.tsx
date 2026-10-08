@@ -6,6 +6,11 @@ export interface AccessDeniedStateProps {
    * component never strands the user on the denied screen.
    */
   onBack?: () => void;
+  /**
+   * When given, a sign-out button is rendered next to the back button so a
+   * session that may not be here can still leave the screen.
+   */
+  onSignOut?: () => void;
   /** Overrides the headline; defaults to the active-language copy. */
   title?: string;
   /** Overrides the body copy; defaults to the active-language copy. */
@@ -18,6 +23,7 @@ export interface AccessDeniedStateProps {
  */
 export default function AccessDeniedState({
   onBack,
+  onSignOut,
   title,
   description,
 }: AccessDeniedStateProps) {
@@ -42,14 +48,26 @@ export default function AccessDeniedState({
       <p className="max-w-md text-sm text-yellow-800">
         {description ?? t('state.accessDenied.description')}
       </p>
-      <button
-        type="button"
-        data-testid="back-button"
-        onClick={handleBack}
-        className="min-h-[44px] rounded-md bg-gray-800 px-4 text-sm font-medium text-white hover:bg-gray-900"
-      >
-        {t('state.accessDenied.back')}
-      </button>
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <button
+          type="button"
+          data-testid="back-button"
+          onClick={handleBack}
+          className="min-h-[44px] rounded-md bg-gray-800 px-4 text-sm font-medium text-white hover:bg-gray-900"
+        >
+          {t('state.accessDenied.back')}
+        </button>
+        {onSignOut !== undefined && (
+          <button
+            type="button"
+            data-testid="sign-out-button"
+            onClick={onSignOut}
+            className="min-h-[44px] rounded-md border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-100"
+          >
+            {t('state.accessDenied.signOut')}
+          </button>
+        )}
+      </div>
     </section>
   );
 }

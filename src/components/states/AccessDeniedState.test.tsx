@@ -67,4 +67,22 @@ describe('AccessDeniedState', () => {
     expect(screen.getByText('Judul khusus')).toBeInTheDocument();
     expect(screen.getByText('Deskripsi khusus')).toBeInTheDocument();
   });
+
+  it('renders no sign-out button unless a handler is given', () => {
+    renderDenied();
+
+    expect(screen.queryByTestId('sign-out-button')).not.toBeInTheDocument();
+  });
+
+  it('offers sign out and fires the handler', () => {
+    const onSignOut = vi.fn();
+    renderDenied(<AccessDeniedState onSignOut={onSignOut} />);
+
+    fireEvent.click(screen.getByTestId('sign-out-button'));
+
+    expect(screen.getByTestId('sign-out-button')).toHaveTextContent(
+      id['state.accessDenied.signOut'],
+    );
+    expect(onSignOut).toHaveBeenCalledTimes(1);
+  });
 });

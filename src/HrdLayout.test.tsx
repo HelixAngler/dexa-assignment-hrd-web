@@ -5,15 +5,28 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { id } from './i18n/id';
 import { I18nProvider } from './i18n/provider';
 import type { AlertProjection } from './services/alerts';
+import { SessionContext, type SessionValue } from './services/session';
 import HrdLayout from './HrdLayout';
 
-function renderLayout() {
+function makeSession(): SessionValue {
+  return {
+    session: { role: 'hrd', mustChangePassword: false },
+    status: 'authed',
+    refresh: vi.fn(),
+    login: vi.fn(),
+    logout: vi.fn(),
+  };
+}
+
+function renderLayout(value: SessionValue = makeSession()) {
   return render(
-    <I18nProvider>
-      <MemoryRouter initialEntries={['/karyawan']}>
-        <HrdLayout />
-      </MemoryRouter>
-    </I18nProvider>,
+    <SessionContext.Provider value={value}>
+      <I18nProvider>
+        <MemoryRouter initialEntries={['/karyawan']}>
+          <HrdLayout />
+        </MemoryRouter>
+      </I18nProvider>
+    </SessionContext.Provider>,
   );
 }
 
@@ -140,5 +153,21 @@ describe('HrdLayout', () => {
     expect(list).toHaveTextContent(layoutAlert.employeeName);
     expect(list).toHaveClass('flex-col');
     expect(list).toHaveClass('md:flex-row');
+  });
+
+  it('offers sign out in the header and hands the request to the session', async () => {
+    const user = userEvent.setup();
+    const logout = vi.fn().mockResolvedValue(undefined);
+    renderLayout({
+      session: { role: 'hrd', mustChangePassword: false },
+      status: 'authed',
+      refresh: vi.fn(),
+      login: vi.fn(),
+      logout,
+    });
+
+    await user.click(screen.getByTestId('shell-sign-out'));
+
+    expect(logout).toHaveBeenCalledTimes(1);
   });
 });

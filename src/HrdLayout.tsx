@@ -3,6 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { AlertBanner } from './components';
 import type { DictKey } from './i18n/id';
 import { LanguageToggle, useI18n } from './i18n/provider';
+import { useSession } from './services/session';
 
 /** Navigation targets; labels are resolved through the i18n dictionary. */
 export const navItems: readonly { to: string; labelKey: DictKey }[] = [
@@ -25,6 +26,7 @@ const navLinkClassName = ({ isActive }: { isActive: boolean }): string =>
 export default function HrdLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { t } = useI18n();
+  const { logout } = useSession();
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -48,6 +50,14 @@ export default function HrdLayout() {
 
           <div className="flex items-center">
             <LanguageToggle />
+            <button
+              type="button"
+              data-testid="shell-sign-out"
+              onClick={() => void logout()}
+              className="ml-1 flex min-h-[44px] items-center rounded-md border border-gray-200 px-3 text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+            >
+              {t('state.accessDenied.signOut')}
+            </button>
             <button
               type="button"
               data-testid="nav-toggle"

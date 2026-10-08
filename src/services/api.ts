@@ -9,12 +9,19 @@ import { LANG_STORAGE_KEY } from '../i18n/provider';
 export class ApiError extends Error {
   readonly status: number;
   readonly code: string;
+  readonly attemptsRemaining?: number;
 
-  constructor(status: number, code: string, message: string) {
+  constructor(
+    status: number,
+    code: string,
+    message: string,
+    attemptsRemaining?: number,
+  ) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.code = code;
+    this.attemptsRemaining = attemptsRemaining;
   }
 }
 
@@ -26,6 +33,7 @@ const FALLBACK_CODES: Record<number, string> = {
   404: 'NOT_FOUND',
   409: 'CONFLICT',
   422: 'UNPROCESSABLE',
+  423: 'ACCOUNT_LOCKED',
   500: 'INTERNAL',
 };
 
@@ -85,6 +93,10 @@ export async function apiFetch<T>(
     typeof details.message === 'string'
       ? details.message
       : `Request failed with status ${response.status}.`;
+  const attemptsRemaining =
+    typeof details.attemptsRemaining === 'number'
+      ? details.attemptsRemaining
+      : undefined;
 
-  throw new ApiError(response.status, code, message);
+  throw new ApiError(response.status, code, message, attemptsRemaining);
 }
