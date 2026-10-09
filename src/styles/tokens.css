@@ -1,5 +1,6 @@
 /*
- * Design tokens shared by the reference mockups and both applications.
+ * Custom properties shared by both applications: color, status, type, space,
+ * radius, elevation, breakpoints, and motion.
  * Each custom property below is the single source of truth for its value:
  * screens read them through var(--...) and never restate the literal, so a
  * value changes in exactly one place.
