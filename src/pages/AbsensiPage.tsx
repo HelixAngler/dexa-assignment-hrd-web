@@ -125,7 +125,7 @@ export default function AbsensiPage() {
         <button
           type="submit"
           data-testid="absensi-search-submit"
-          className="min-h-[44px] rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700"
+          className="min-h-[44px] w-full rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 md:w-auto"
         >
           {t('absensi.searchSubmit')}
         </button>

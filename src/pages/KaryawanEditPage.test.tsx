@@ -287,11 +287,97 @@ describe('KaryawanEditPage', () => {
     expect(screen.queryByTestId('temporary-password')).not.toBeInTheDocument();
   });
 
-  it('reports a failed reset without showing any password', async () => {
+  it('hands a failed save to the shared state and re-patches on retry', async () => {
     const user = userEvent.setup();
-    vi.mocked(employeesService.resetEmployeePassword).mockRejectedValue(
-      new ApiError(404, 'NOT_FOUND', 'gone'),
+    vi.mocked(employeesService.updateEmployee)
+      .mockRejectedValueOnce(new ApiError(500, 'INTERNAL', 'stack trace here'))
+      .mockResolvedValue(undefined);
+    renderEdit();
+
+    await screen.findByDisplayValue('Budi Santoso');
+    await fillName(user);
+    await user.click(screen.getByTestId('employee-form-submit'));
+
+    const state = await screen.findByTestId('server-error-state');
+    expect(state).toHaveTextContent(id['form.error.save']);
+    expect(state).toHaveTextContent(id['state.serverError.description']);
+    expect(state).not.toHaveTextContent('stack trace here');
+    expect(screen.queryByTestId('employee-form-error')).not.toBeInTheDocument();
+    expect(screen.getByLabelText(id['form.name'])).toHaveValue('Budi S.');
+
+    await user.click(screen.getByTestId('retry-button'));
+
+    expect(employeesService.updateEmployee).toHaveBeenCalledTimes(2);
+    expect(employeesService.updateEmployee).toHaveBeenLastCalledWith('emp-1', {
+      name: 'Budi S.',
+      email: 'budi@corp.test',
+      position: 'Engineer',
+    });
+    expect(await screen.findByTestId('success-toast')).toBeInTheDocument();
+    expect(screen.queryByTestId('server-error-state')).not.toBeInTheDocument();
+  });
+
+  it('drops the failed-save offer as soon as the form is edited again', async () => {
+    const user = userEvent.setup();
+    vi.mocked(employeesService.updateEmployee).mockRejectedValueOnce(
+      new ApiError(500, 'INTERNAL', 'boom'),
     );
+    renderEdit();
+
+    await screen.findByDisplayValue('Budi Santoso');
+    await fillName(user);
+    await user.click(screen.getByTestId('employee-form-submit'));
+
+    expect(await screen.findByTestId('server-error-state')).toBeInTheDocument();
+
+    await fillName(user);
+
+    expect(screen.queryByTestId('server-error-state')).not.toBeInTheDocument();
+    expect(employeesService.updateEmployee).toHaveBeenCalledTimes(1);
+  });
+
+  it('hands a failed status change to the shared state and retries that status', async () => {
+    const user = userEvent.setup();
+    vi.mocked(employeesService.setEmployeeStatus)
+      .mockRejectedValueOnce(new ApiError(500, 'INTERNAL', 'boom'))
+      .mockResolvedValue(undefined);
+    renderEdit();
+
+    await screen.findByDisplayValue('Budi Santoso');
+    await user.click(
+      screen.getByRole('radio', { name: id['karyawan.status.deactivated'] }),
+    );
+    await user.click(
+      screen.getByRole('button', { name: id['karyawan.edit.statusApply'] }),
+    );
+    await user.click(
+      screen.getByRole('button', { name: id['karyawan.edit.statusConfirm'] }),
+    );
+
+    const state = await screen.findByTestId('server-error-state');
+    expect(state).toHaveTextContent(id['form.error.save']);
+    expect(
+      screen.queryByText(id['karyawan.edit.statusConfirmTitle']),
+    ).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId('retry-button'));
+
+    expect(employeesService.setEmployeeStatus).toHaveBeenCalledTimes(2);
+    expect(employeesService.setEmployeeStatus).toHaveBeenLastCalledWith(
+      'emp-1',
+      'deactivated',
+    );
+    expect(await screen.findByTestId('success-toast')).toHaveTextContent(
+      id['toast.karyawan.statusChanged'],
+    );
+    expect(screen.queryByTestId('server-error-state')).not.toBeInTheDocument();
+  });
+
+  it('hands a failed reset to the shared state and retries without showing a password', async () => {
+    const user = userEvent.setup();
+    vi.mocked(employeesService.resetEmployeePassword)
+      .mockRejectedValueOnce(new ApiError(404, 'NOT_FOUND', 'gone'))
+      .mockResolvedValue({ temporaryPassword: 'Nw7-plq' });
     renderEdit();
 
     await screen.findByDisplayValue('Budi Santoso');
@@ -299,10 +385,19 @@ describe('KaryawanEditPage', () => {
       screen.getByRole('button', { name: id['karyawan.edit.resetAction'] }),
     );
 
-    expect(await screen.findByTestId('karyawan-edit-error')).toHaveTextContent(
-      id['form.error.save'],
-    );
+    const state = await screen.findByTestId('server-error-state');
+    expect(state).toHaveTextContent(id['form.error.save']);
+    expect(state).toHaveTextContent(id['state.serverError.description']);
+    expect(screen.queryByTestId('karyawan-edit-error')).not.toBeInTheDocument();
     expect(screen.queryByTestId('temporary-password')).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId('retry-button'));
+
+    expect(employeesService.resetEmployeePassword).toHaveBeenCalledTimes(2);
+    expect(await screen.findByTestId('temporary-password')).toHaveTextContent(
+      'Nw7-plq',
+    );
+    expect(screen.queryByTestId('server-error-state')).not.toBeInTheDocument();
   });
 
   it('keeps the password UX of the add screen off this screen', async () => {

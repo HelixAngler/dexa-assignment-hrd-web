@@ -134,6 +134,40 @@ describe('KaryawanListPage', () => {
     );
   });
 
+  it('puts the add action full width on a phone and beside the title wider up', async () => {
+    renderList();
+
+    const link = await screen.findByTestId('karyawan-add-button');
+    const row = link.parentElement;
+
+    expect(row?.className).toContain('flex-col');
+    expect(row?.className).toContain('sm:flex-row');
+    expect(link.className).toContain('min-h-[44px]');
+    expect(link.className).toContain('w-full');
+    expect(link.className).toContain('sm:w-auto');
+  });
+
+  it('wraps long employee values in both halves instead of widening either one', async () => {
+    const longEmail =
+      'firstname.lastname.with.an.extremely.long.local.part@corp.test.example.com';
+    vi.mocked(employeesService.listEmployees).mockResolvedValue([
+      { ...rows[0], email: longEmail },
+    ]);
+    renderList();
+
+    await screen.findByTestId('karyawan-table');
+
+    for (const cell of screen.getAllByText(longEmail)) {
+      expect(cell.className).toContain('break-all');
+    }
+    for (const cell of screen.getAllByText('Budi Santoso')) {
+      expect(cell.className).toContain('break-words');
+    }
+    for (const cell of screen.getAllByText('Engineer')) {
+      expect(cell.className).toContain('break-words');
+    }
+  });
+
   it('shows the empty state with an explanation when nobody is listed', async () => {
     vi.mocked(employeesService.listEmployees).mockResolvedValue([]);
     renderList();

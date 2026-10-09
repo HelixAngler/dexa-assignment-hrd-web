@@ -100,10 +100,10 @@ export default function AlertBanner({ createTransport }: AlertBannerProps) {
           className="flex min-w-0 flex-1 items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 shadow-sm md:min-w-[280px]"
         >
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-amber-900">
+            <p className="break-words text-sm font-semibold text-amber-900">
               {alert.employeeName}
             </p>
-            <p className="text-sm text-amber-800">
+            <p className="break-words text-sm text-amber-800">
               {describeChange(alert, t)}
             </p>
             <time

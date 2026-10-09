@@ -90,6 +90,32 @@ describe('AttendanceRow', () => {
     });
   });
 
+  it('wraps a long employee name in both halves instead of widening either one', () => {
+    const longName =
+      'Muhammad Abdurrahman Wahyudiansyah Kusumaatmadja Wirasenjaya';
+    render(
+      <I18nProvider>
+        <table>
+          <tbody>
+            <AttendanceRow
+              row={{ ...rows.done, name: longName }}
+              layout="table"
+            />
+          </tbody>
+        </table>
+        <ul>
+          <AttendanceRow row={{ ...rows.done, name: longName }} layout="card" />
+        </ul>
+      </I18nProvider>,
+    );
+
+    const names = screen.getAllByText(longName);
+    expect(names).toHaveLength(2);
+    for (const name of names) {
+      expect(name.className).toContain('break-words');
+    }
+  });
+
   it('shows locale times and the finished label for a completed punch', () => {
     renderRows();
     const { table, card } = entriesFor('done');

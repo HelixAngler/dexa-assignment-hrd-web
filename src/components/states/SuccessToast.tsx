@@ -67,7 +67,7 @@ export default function SuccessToast({
       >
         ✓
       </span>
-      <span className="flex-1 text-sm font-medium text-green-900">
+      <span className="min-w-0 flex-1 break-words text-sm font-medium text-green-900">
         {message}
       </span>
       <button
@@ -75,7 +75,7 @@ export default function SuccessToast({
         data-testid="success-toast-dismiss"
         aria-label={t('state.success.dismiss')}
         onClick={dismiss}
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded text-green-800 hover:bg-green-100"
+        className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded text-green-800 hover:bg-green-100"
       >
         <span aria-hidden="true">✕</span>
       </button>

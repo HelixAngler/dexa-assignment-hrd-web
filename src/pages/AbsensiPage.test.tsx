@@ -63,6 +63,15 @@ describe('AbsensiPage', () => {
     vi.unstubAllGlobals();
   });
 
+  it('stacks the search action full width on a phone so it sits in the thumb zone', () => {
+    renderPage();
+
+    const button = screen.getByTestId('absensi-search-submit');
+    expect(button.className).toContain('min-h-[44px]');
+    expect(button.className).toContain('w-full');
+    expect(button.className).toContain('md:w-auto');
+  });
+
   it('asks for today by default and reserves the layout while it loads', () => {
     vi.mocked(attendanceService.fetchAttendance).mockReturnValue(
       new Promise(() => {}),

@@ -140,6 +140,23 @@ describe('AlertBanner', () => {
     expect(second).toHaveTextContent(passwordAlert.employeeName);
   });
 
+  it('wraps long alert text instead of clipping it in the banner', async () => {
+    const longName = 'Alexandria-Cassandra-Helena-Carter-Fitzgerald';
+    stubFetch({ recent: [{ ...phoneAlert, employeeName: longName }] });
+    renderBanner(createFakeTransport().createTransport);
+
+    await screen.findAllByTestId('alert-banner');
+
+    const name = screen.getByText(longName);
+    expect(name.className).toContain('break-words');
+    expect(name.className).not.toContain('truncate');
+
+    const change = screen.getByText(
+      id['alert.changedFields'].replace('{fields}', id['alert.field.phone']),
+    );
+    expect(change.className).toContain('break-words');
+  });
+
   it('omits since on the very first visit and persists a new baseline', async () => {
     const fetchMock = stubFetch({ recent: [] });
     renderBanner(createFakeTransport().createTransport);

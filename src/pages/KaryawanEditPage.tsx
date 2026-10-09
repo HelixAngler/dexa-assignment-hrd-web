@@ -23,6 +23,9 @@ import {
 /** Where the screen is in the load of the row it edits. */
 type LoadState = 'loading' | 'ready' | 'error' | 'missing';
 
+/** Which action the shared server-error state is currently waiting on. */
+type FailedAction = 'save' | 'status' | 'reset' | null;
+
 /**
  * Maps validated form values onto the patch payload: required identity
  * fields always travel, while the optional columns are only sent when the
@@ -58,10 +61,11 @@ export default function KaryawanEditPage() {
   const [statusPending, setStatusPending] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [revealedPassword, setRevealedPassword] = useState<string | null>(null);
-  const [pageError, setPageError] = useState<string | null>(null);
+  const [failedAction, setFailedAction] = useState<FailedAction>(null);
+  const [lastValues, setLastValues] = useState<EmployeeFormValues | null>(null);
+  const [lastStatus, setLastStatus] = useState<EmployeeStatus | null>(null);
   const [formPending, setFormPending] = useState(false);
   const [emailTaken, setEmailTaken] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (id === undefined) {
@@ -69,7 +73,7 @@ export default function KaryawanEditPage() {
       return;
     }
     setLoadState('loading');
-    setPageError(null);
+    setFailedAction(null);
     try {
       const row = await fetchEmployeeById(id);
       if (row === null) {
@@ -96,7 +100,8 @@ export default function KaryawanEditPage() {
     }
     setFormPending(true);
     setEmailTaken(false);
-    setFormError(null);
+    setFailedAction(null);
+    setLastValues(values);
     try {
       await updateEmployee(id, toUpdateInput(values));
       setEmployee((current) =>
@@ -118,7 +123,7 @@ export default function KaryawanEditPage() {
       ) {
         setEmailTaken(true);
       } else {
-        setFormError(t('form.error.save'));
+        setFailedAction('save');
       }
     } finally {
       setFormPending(false);
@@ -130,7 +135,8 @@ export default function KaryawanEditPage() {
       return;
     }
     setStatusPending(true);
-    setPageError(null);
+    setFailedAction(null);
+    setLastStatus(status);
     try {
       await setEmployeeStatus(id, status);
       setEmployee((current) => (current === null ? current : { ...current, status }));
@@ -139,7 +145,7 @@ export default function KaryawanEditPage() {
       toast.show(t('toast.karyawan.statusChanged'));
     } catch {
       setConfirmingStatus(false);
-      setPageError(t('form.error.save'));
+      setFailedAction('status');
     } finally {
       setStatusPending(false);
     }
@@ -165,16 +171,27 @@ export default function KaryawanEditPage() {
       return;
     }
     setResetting(true);
-    setPageError(null);
+    setFailedAction(null);
     setRevealedPassword(null);
     try {
       const result = await resetEmployeePassword(id);
       setRevealedPassword(result.temporaryPassword);
       toast.show(t('toast.karyawan.passwordReset'));
     } catch {
-      setPageError(t('form.error.save'));
+      setFailedAction('reset');
     } finally {
       setResetting(false);
+    }
+  }
+
+  /** Re-runs whichever action failed, with the values that were submitted. */
+  function retryFailedAction() {
+    if (failedAction === 'save' && lastValues !== null) {
+      void handleSave(lastValues);
+    } else if (failedAction === 'status' && lastStatus !== null) {
+      void commitStatus(lastStatus);
+    } else if (failedAction === 'reset') {
+      void handleResetPassword();
     }
   }
 
@@ -186,14 +203,8 @@ export default function KaryawanEditPage() {
         {t('karyawan.edit.title')}
       </h1>
 
-      {pageError !== null && (
-        <div
-          role="alert"
-          data-testid="karyawan-edit-error"
-          className="rounded-md border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-700"
-        >
-          <p>{pageError}</p>
-        </div>
+      {failedAction !== null && (
+        <ServerErrorState title={t('form.error.save')} onRetry={retryFailedAction} />
       )}
 
       {loadState === 'loading' && <LoadingState />}
@@ -226,7 +237,11 @@ export default function KaryawanEditPage() {
               mode="edit"
               pending={formPending}
               emailTaken={emailTaken}
-              serverError={formError}
+              onValuesChange={() =>
+                setFailedAction((current) =>
+                  current === 'save' ? null : current,
+                )
+              }
               initialValues={{
                 name: employee.name,
                 email: employee.email,

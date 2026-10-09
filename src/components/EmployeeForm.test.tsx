@@ -289,10 +289,14 @@ describe('EmployeeForm', () => {
     ).toBeDisabled();
   });
 
-  it('renders a server-side save failure above the form', () => {
-    renderForm({ serverError: 'boom' });
+  it('reports field edits back to the caller', async () => {
+    const user = userEvent.setup();
+    const onValuesChange = vi.fn();
+    renderForm({ onValuesChange });
 
-    expect(screen.getByRole('alert')).toHaveTextContent('boom');
+    await user.type(screen.getByLabelText(id['form.name']), 'B');
+
+    expect(onValuesChange).toHaveBeenCalled();
   });
 
   it('renders the notice slot before the submit button', () => {

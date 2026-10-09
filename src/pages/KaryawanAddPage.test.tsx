@@ -219,19 +219,36 @@ describe('KaryawanAddPage', () => {
     expect(screen.queryByTestId('temporary-password')).not.toBeInTheDocument();
   });
 
-  it('reports a non-conflict failure without leaking server text', async () => {
+  it('hands a server fault to the shared state and re-creates on retry', async () => {
     const user = userEvent.setup();
-    vi.mocked(employeesService.createEmployee).mockRejectedValue(
-      new ApiError(500, 'INTERNAL', 'stack trace here'),
-    );
+    vi.mocked(employeesService.createEmployee)
+      .mockRejectedValueOnce(new ApiError(500, 'INTERNAL', 'stack trace here'))
+      .mockResolvedValue({ id: 'emp-9', temporaryPassword: 'K9x-ty2' });
     renderAdd();
 
     await fillForm(user);
     await user.click(screen.getByTestId('employee-form-submit'));
 
-    const alert = await screen.findByTestId('employee-form-error');
-    expect(alert).toHaveTextContent(id['form.error.save']);
-    expect(alert).not.toHaveTextContent('stack trace here');
+    const state = await screen.findByTestId('server-error-state');
+    expect(state).toHaveTextContent(id['form.error.save']);
+    expect(state).toHaveTextContent(id['state.serverError.description']);
+    expect(state).not.toHaveTextContent('stack trace here');
+    expect(screen.queryByTestId('employee-form-error')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('error-email')).not.toBeInTheDocument();
+    expect(screen.getByLabelText(id['form.name'])).toHaveValue('Budi Santoso');
+
+    await user.click(screen.getByTestId('retry-button'));
+
+    expect(await screen.findByTestId('temporary-password')).toHaveTextContent(
+      'K9x-ty2',
+    );
+    expect(employeesService.createEmployee).toHaveBeenCalledTimes(2);
+    expect(employeesService.createEmployee).toHaveBeenLastCalledWith({
+      name: 'Budi Santoso',
+      email: 'budi@corp.test',
+      position: 'Engineer',
+      phone: '0812000000',
+    });
   });
 
   it('keeps the save button disabled while the request is in flight', async () => {

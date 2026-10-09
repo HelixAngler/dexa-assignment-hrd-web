@@ -116,10 +116,10 @@ export interface EmployeeFormProps {
   pending?: boolean;
   /** Set by the caller on a 409 `EMAIL_TAKEN` answer for the typed address. */
   emailTaken?: boolean;
-  /** Copy for a failure the field errors cannot describe. */
-  serverError?: string | null;
   /** Extra content rendered between the fields and the submit button. */
   notice?: ReactNode;
+  /** Called whenever a field value changes, before validation runs. */
+  onValuesChange?: () => void;
   /** Receives the parsed values; the caller performs the request. */
   onSubmit: (values: EmployeeFormValues) => void;
 }
@@ -135,8 +135,8 @@ export default function EmployeeForm({
   initialValues,
   pending = false,
   emailTaken = false,
-  serverError = null,
   notice,
+  onValuesChange,
   onSubmit,
 }: EmployeeFormProps) {
   const { t } = useI18n();
@@ -163,6 +163,7 @@ export default function EmployeeForm({
     if (field === 'email') {
       setEmailTakenDismissed(true);
     }
+    onValuesChange?.();
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -311,16 +312,6 @@ export default function EmployeeForm({
           {t('form.photoHint')}
         </p>
       </div>
-
-      {serverError !== null && (
-        <div
-          role="alert"
-          data-testid="employee-form-error"
-          className="rounded-md border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-700"
-        >
-          <p>{serverError}</p>
-        </div>
-      )}
 
       {notice}
 

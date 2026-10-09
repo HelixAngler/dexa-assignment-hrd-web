@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EmployeeForm, type EmployeeFormValues } from '../components';
-import { useSuccessToast } from '../components/states';
+import { ServerErrorState, useSuccessToast } from '../components/states';
 import { useI18n } from '../i18n/provider';
 import { ApiError } from '../services/api';
 import {
@@ -52,7 +52,10 @@ function toCreateInput(values: EmployeeFormValues): EmployeeCreateInput {
  * forced-first-login rule and offers a local preview of the kind of temporary
  * password the account will receive; the save posts only the profile fields
  * (never any password material) and the server's one-time password is then
- * revealed with copy guidance until the admin returns to the list.
+ * revealed with copy guidance until the admin returns to the list. A
+ * duplicate address is answered as a field error, while a server that never
+ * completed the create hands off to the shared server-error state, which
+ * re-posts the same values — the record does not exist until the save lands.
  */
 export default function KaryawanAddPage() {
   const { t } = useI18n();
@@ -60,7 +63,8 @@ export default function KaryawanAddPage() {
   const toast = useSuccessToast();
   const [pending, setPending] = useState(false);
   const [emailTaken, setEmailTaken] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
+  const [fault, setFault] = useState(false);
+  const [lastValues, setLastValues] = useState<EmployeeFormValues | null>(null);
   const [issued, setIssued] = useState<EmployeeCreated | null>(null);
   const [previewPassword, setPreviewPassword] = useState(generatePreviewPassword);
   const [copied, setCopied] = useState(false);
@@ -71,7 +75,8 @@ export default function KaryawanAddPage() {
     }
     setPending(true);
     setEmailTaken(false);
-    setServerError(null);
+    setFault(false);
+    setLastValues(values);
     try {
       const created = await createEmployee(toCreateInput(values));
       setIssued(created);
@@ -84,7 +89,7 @@ export default function KaryawanAddPage() {
       ) {
         setEmailTaken(true);
       } else {
-        setServerError(t('form.error.save'));
+        setFault(true);
       }
     } finally {
       setPending(false);
@@ -157,7 +162,7 @@ export default function KaryawanAddPage() {
           mode="add"
           pending={pending}
           emailTaken={emailTaken}
-          serverError={serverError}
+          onValuesChange={() => setFault(false)}
           onSubmit={(values) => void handleSubmit(values)}
           notice={
             <div
@@ -196,6 +201,19 @@ export default function KaryawanAddPage() {
           }
         />
       </div>
+
+      {fault && (
+        <div className="mt-4">
+          <ServerErrorState
+            title={t('form.error.save')}
+            onRetry={() => {
+              if (lastValues !== null) {
+                void handleSubmit(lastValues);
+              }
+            }}
+          />
+        </div>
+      )}
 
       {toast.toast}
     </section>

@@ -118,7 +118,9 @@ function AttendanceTableRow({ row }: CellProps) {
       data-employee-id={row.employeeId}
       className="text-gray-900"
     >
-      <td className="py-2 pr-4 font-medium text-gray-900">{row.name}</td>
+      <td className="py-2 pr-4 font-medium break-words text-gray-900">
+        {row.name}
+      </td>
       <td
         data-testid="attendance-masuk"
         className="py-2 pr-4 tabular-nums text-gray-700"
@@ -149,7 +151,9 @@ function AttendanceCard({ row }: CellProps) {
       data-employee-id={row.employeeId}
       className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
     >
-      <p className="text-sm font-semibold text-gray-900">{row.name}</p>
+      <p className="break-words text-sm font-semibold text-gray-900">
+        {row.name}
+      </p>
       <dl className="mt-2 space-y-1 text-sm">
         <div className="flex items-baseline justify-between gap-3">
           <dt className="text-gray-500">{t('absensi.column.masuk')}</dt>

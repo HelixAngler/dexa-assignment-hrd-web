@@ -72,11 +72,11 @@ export default function KaryawanListPage() {
   }, [load]);
 
   const addButtonClass =
-    'inline-flex min-h-[44px] items-center rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700';
+    'inline-flex min-h-[44px] w-full items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 sm:w-auto';
 
   return (
     <section data-testid="karyawan-list" className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-xl font-semibold text-gray-900">
           {t('karyawan.list.title')}
         </h1>
@@ -141,11 +141,13 @@ export default function KaryawanListPage() {
                     data-testid="karyawan-row"
                     className="border-b border-gray-100 bg-white"
                   >
-                    <td className="py-3 pr-4 font-medium text-gray-900">
+                    <td className="py-3 pr-4 font-medium break-words text-gray-900">
                       {row.name}
                     </td>
-                    <td className="py-3 pr-4 text-gray-700">{row.email}</td>
-                    <td className="py-3 pr-4 text-gray-700">{row.position}</td>
+                    <td className="py-3 pr-4 break-all text-gray-700">{row.email}</td>
+                    <td className="py-3 pr-4 break-words text-gray-700">
+                      {row.position}
+                    </td>
                     <td className="py-3 pr-4">
                       <StatusBadge status={row.status} />
                     </td>
@@ -175,13 +177,15 @@ export default function KaryawanListPage() {
                 data-testid="karyawan-card"
                 className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
               >
-                <p className="text-base font-semibold text-gray-900">
+                <p className="text-base font-semibold break-words text-gray-900">
                   {row.name}
                 </p>
                 <p className="mt-1 break-all text-sm text-gray-700">
                   {row.email}
                 </p>
-                <p className="mt-1 text-sm text-gray-700">{row.position}</p>
+                <p className="mt-1 break-words text-sm text-gray-700">
+                  {row.position}
+                </p>
                 <div className="mt-2 flex items-center justify-between gap-3">
                   <StatusBadge status={row.status} />
                   <Link

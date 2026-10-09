@@ -160,21 +160,46 @@ describe('LoginPage', () => {
     );
   });
 
-  it('shows the retry-able connection copy when the network fails', async () => {
+  it('hands a network failure to the shared server-error state with a working retry', async () => {
     const user = userEvent.setup();
-    const login = vi.fn().mockRejectedValue(
-      new ApiError(0, 'NETWORK_ERROR', 'The request could not reach the server.'),
-    );
+    const login = vi
+      .fn()
+      .mockRejectedValueOnce(
+        new ApiError(0, 'NETWORK_ERROR', 'The request could not reach the server.'),
+      )
+      .mockResolvedValue({ role: 'hrd', mustChangePassword: false });
     renderLogin(makeSession({ login }));
 
     await fillAndSubmit(user);
 
-    expect(await screen.findByTestId('login-error')).toHaveTextContent(
-      id['auth.error.network'],
-    );
+    const state = await screen.findByTestId('server-error-state');
+    expect(state).toHaveTextContent(id['auth.error.network']);
+    expect(state).toHaveTextContent(id['state.serverError.description']);
+    expect(screen.queryByTestId('login-error')).not.toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: id['login.submit'] }),
     ).toBeEnabled();
+
+    await user.click(screen.getByTestId('retry-button'));
+
+    expect(await screen.findByText('karyawan-destination')).toBeInTheDocument();
+    expect(login).toHaveBeenCalledTimes(2);
+    expect(login).toHaveBeenLastCalledWith('admin@corp.test', 'secret-1');
+  });
+
+  it('routes an unexpected server failure through the same shared state', async () => {
+    const user = userEvent.setup();
+    const login = vi
+      .fn()
+      .mockRejectedValue(new ApiError(500, 'INTERNAL', 'boom'));
+    renderLogin(makeSession({ login }));
+
+    await fillAndSubmit(user);
+
+    const state = await screen.findByTestId('server-error-state');
+    expect(state).toHaveTextContent(id['auth.error.generic']);
+    expect(screen.queryByTestId('login-error')).not.toBeInTheDocument();
+    expect(screen.queryByText('karyawan-destination')).not.toBeInTheDocument();
   });
 
   it('disables the submit button while the sign-in is in flight', async () => {

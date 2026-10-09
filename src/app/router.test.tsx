@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from '../App';
+import { protectedRoutes } from './router';
 import { id } from '../i18n/id';
 import { I18nProvider } from '../i18n/provider';
 import * as attendanceService from '../services/attendance';
@@ -232,5 +233,108 @@ describe('session routing policy', () => {
 
     expect(await screen.findByTestId('karyawan-list')).toBeInTheDocument();
     expect(screen.queryByTestId('login')).not.toBeInTheDocument();
+  });
+});
+
+describe('language toggle on every screen', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    window.sessionStorage.clear();
+    vi.mocked(authService.fetchSession).mockReset();
+    vi.mocked(authService.login).mockReset();
+    vi.mocked(authService.logout).mockReset();
+    vi.mocked(authService.logout).mockResolvedValue(undefined);
+    vi.mocked(employeesService.listEmployees).mockReset();
+    vi.mocked(employeesService.listEmployees).mockResolvedValue([]);
+    vi.mocked(employeesService.fetchEmployeeById).mockReset();
+    vi.mocked(employeesService.fetchEmployeeById).mockResolvedValue(null);
+    vi.mocked(attendanceService.fetchAttendance).mockReset();
+    vi.mocked(attendanceService.fetchAttendance).mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('switches the sign-in screen to English without another session probe', async () => {
+    const user = userEvent.setup();
+    vi.mocked(authService.fetchSession).mockResolvedValue(null);
+    renderAt('/login');
+
+    expect(await screen.findByTestId('login')).toBeInTheDocument();
+    const probesSoFar = vi.mocked(authService.fetchSession).mock.calls.length;
+
+    await user.click(screen.getByTestId('lang-toggle'));
+
+    expect(
+      screen.getByRole('button', { name: 'Sign in' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Sign in to the HRD console with your company email.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(id['login.subtitle'])).not.toBeInTheDocument();
+    expect(window.localStorage.getItem('lang')).toBe('en');
+    expect(vi.mocked(authService.fetchSession).mock.calls.length).toBe(
+      probesSoFar,
+    );
+    expect(authService.login).not.toHaveBeenCalled();
+    expect(authService.logout).not.toHaveBeenCalled();
+  });
+
+  it('switches the forced first-password screen to English immediately', async () => {
+    const user = userEvent.setup();
+    vi.mocked(authService.fetchSession).mockResolvedValue({
+      ...hrdSession,
+      mustChangePassword: true,
+    });
+    renderAt('/karyawan');
+
+    expect(await screen.findByTestId('first-login')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('lang-toggle'));
+
+    expect(screen.getByText('First sign-in')).toBeInTheDocument();
+    expect(screen.queryByText(id['firstLogin.title'])).not.toBeInTheDocument();
+    expect(window.localStorage.getItem('lang')).toBe('en');
+  });
+
+  it('switches the access-denied screen to English immediately', async () => {
+    const user = userEvent.setup();
+    vi.mocked(authService.fetchSession).mockResolvedValue(employeeSession);
+    renderAt('/karyawan');
+
+    await screen.findByTestId('access-denied-state');
+
+    await user.click(screen.getByTestId('lang-toggle'));
+
+    expect(screen.getByText('Access denied')).toBeInTheDocument();
+    expect(
+      screen.queryByText(id['route.denied.employeeTitle']),
+    ).not.toBeInTheDocument();
+  });
+
+  it('offers the toggle while the session is still being probed', () => {
+    vi.mocked(authService.fetchSession).mockReturnValue(new Promise(() => {}));
+    renderAt('/karyawan');
+
+    expect(screen.getByTestId('loading-state')).toBeInTheDocument();
+    expect(screen.getByTestId('lang-toggle')).toBeInTheDocument();
+  });
+
+  it('offers the toggle inside the shell of every protected route', async () => {
+    vi.mocked(authService.fetchSession).mockResolvedValue(hrdSession);
+    for (const route of protectedRoutes) {
+      const path = (route.path ?? '/').replace(':id', '99');
+      const view = renderAt(path);
+      expect(
+        await screen.findByTestId('nav-desktop'),
+        `shell missing on ${path}`,
+      ).toBeInTheDocument();
+      expect(
+        screen.getByTestId('lang-toggle'),
+        `toggle missing on ${path}`,
+      ).toBeInTheDocument();
+      view.unmount();
+    }
   });
 });

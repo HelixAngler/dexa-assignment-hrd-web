@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Navigate, useLocation, type RouteObject } from 'react-router-dom';
 import HrdLayout from '../HrdLayout';
 import { AccessDeniedState, LoadingState } from '../components';
-import { useI18n } from '../i18n/provider';
+import { LanguageToggle, useI18n } from '../i18n/provider';
 import AbsensiPage from '../pages/AbsensiPage';
 import FirstLoginPage from '../pages/FirstLoginPage';
 import KaryawanAddPage from '../pages/KaryawanAddPage';
@@ -47,7 +47,10 @@ export const routeTable: RouteObject[] = [
 /** Centres full-viewport states on the page background, without app chrome. */
 function FullPage({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-gray-50 px-4">
+      <div className="absolute right-4 top-4">
+        <LanguageToggle />
+      </div>
       {children}
     </div>
   );

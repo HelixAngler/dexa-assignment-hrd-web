@@ -126,17 +126,44 @@ describe('FirstLoginPage', () => {
     );
   });
 
-  it('shows generic retry copy when the request cannot reach the server', async () => {
+  it('hands a network failure to the shared server-error state with a working retry', async () => {
+    const user = userEvent.setup();
+    vi.mocked(authService.setFirstPassword)
+      .mockRejectedValueOnce(
+        new ApiError(0, 'NETWORK_ERROR', 'The request could not reach the server.'),
+      )
+      .mockResolvedValue(undefined);
+    const refresh = vi.fn().mockResolvedValue(undefined);
+    renderFirstLogin(makeSession({ refresh }));
+
+    await fillAndSubmit(user);
+
+    const state = await screen.findByTestId('server-error-state');
+    expect(state).toHaveTextContent(id['auth.error.network']);
+    expect(state).toHaveTextContent(id['state.serverError.description']);
+    expect(screen.queryByTestId('first-login-error')).not.toBeInTheDocument();
+
+    await user.click(screen.getByTestId('retry-button'));
+
+    expect(await screen.findByText('karyawan-destination')).toBeInTheDocument();
+    expect(authService.setFirstPassword).toHaveBeenCalledTimes(2);
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it('routes an unexpected server failure through the same shared state', async () => {
     const user = userEvent.setup();
     vi.mocked(authService.setFirstPassword).mockRejectedValue(
-      new ApiError(0, 'NETWORK_ERROR', 'The request could not reach the server.'),
+      new ApiError(500, 'INTERNAL', 'boom'),
     );
     renderFirstLogin(makeSession());
 
     await fillAndSubmit(user);
 
-    expect(await screen.findByTestId('first-login-error')).toHaveTextContent(
-      id['auth.error.network'],
-    );
+    const state = await screen.findByTestId('server-error-state');
+    expect(state).toHaveTextContent(id['auth.error.generic']);
+    expect(screen.queryByTestId('first-login-error')).not.toBeInTheDocument();
+    expect(
+      screen.getByLabelText(id['firstLogin.newPasswordLabel']),
+    ).toHaveValue('brand-new-pass');
   });
 });

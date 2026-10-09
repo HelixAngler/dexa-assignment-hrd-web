@@ -48,6 +48,18 @@ describe('SuccessToast', () => {
     ).toBeInTheDocument();
   });
 
+  it('keeps the dismiss target at least 44px and lets a long message wrap', () => {
+    const message =
+      'Kata sandi sementara berhasil disalin ke papan klip tanpa pemotongan teks sama sekali.';
+    renderToast(<SuccessToast message={message} />);
+
+    const dismiss = screen.getByTestId('success-toast-dismiss');
+    expect(dismiss.className).toContain('min-h-[44px]');
+    expect(dismiss.className).toContain('min-w-[44px]');
+    expect(dismiss.className).not.toMatch(/\bh-8\b/);
+    expect(screen.getByText(message).className).toContain('break-words');
+  });
+
   it('auto-dismisses after the default four seconds and notifies', () => {
     const onDismiss = vi.fn();
     renderToast(
