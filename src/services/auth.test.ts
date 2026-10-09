@@ -145,6 +145,62 @@ describe('auth service', () => {
       });
     });
 
+    it('bootstraps an unknown tab from the profile alone when nothing is remembered', async () => {
+      // A fresh tab shares the session cookie but not the flags the sign-in
+      // form wrote: the profile payload is the only thing it can ask.
+      expect(window.sessionStorage.getItem('hrd-session-meta')).toBeNull();
+      fetchMock.mockResolvedValue(
+        jsonResponse({
+          name: 'Sari',
+          email: 'admin@corp.test',
+          position: 'HRD',
+          phone: '0812000000',
+          photoUrl: null,
+          role: 'hrd',
+        }),
+      );
+
+      await expect(fetchSession()).resolves.toMatchObject({
+        role: 'hrd',
+        name: 'Sari',
+      });
+      expect(window.sessionStorage.getItem('hrd-session-meta')).toBeNull();
+    });
+
+    it('prefers the role the profile reports over flags this tab remembered', async () => {
+      fetchMock.mockResolvedValue(
+        jsonResponse({ role: 'employee', mustChangePassword: false }),
+      );
+      await login('admin@corp.test', 'secret-1');
+
+      fetchMock.mockResolvedValue(
+        jsonResponse({
+          name: 'Sari',
+          email: 'admin@corp.test',
+          position: 'HRD',
+          phone: '0812000000',
+          photoUrl: null,
+          role: 'hrd',
+        }),
+      );
+
+      await expect(fetchSession()).resolves.toMatchObject({ role: 'hrd' });
+    });
+
+    it('denies a session whose profile carries no role and nothing is remembered', async () => {
+      fetchMock.mockResolvedValue(
+        jsonResponse({
+          name: 'Sari',
+          email: 'admin@corp.test',
+          position: 'HRD',
+          phone: '0812000000',
+          photoUrl: null,
+        }),
+      );
+
+      await expect(fetchSession()).resolves.toMatchObject({ role: 'employee' });
+    });
+
     it('rethrows a transport failure instead of pretending the user signed out', async () => {
       fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
 

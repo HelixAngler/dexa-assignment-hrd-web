@@ -38,9 +38,15 @@ export interface LoginResult {
 }
 
 /**
- * Role flags kept across page loads so a cookie-only reload still knows
- * which console it is. This app stores them under its own key so it never
- * reads the flags the employee app remembers for the same origin.
+ * Role flags remembered by this tab's sign-in form. They are no longer what
+ * bootstraps the console: the profile probe answers with the session's own
+ * role, so a tab that only shares the session cookie (a fresh tab, or one
+ * opened by a sign-in that happened elsewhere) still knows which console it
+ * may open. The stored copy survives as a legacy path for a profile payload
+ * that does not carry the flags yet, and for the forced-change flag, which
+ * only sign-in and the password screens set. This app keeps them under its
+ * own key so it never reads the flags the employee app remembers for the
+ * same origin.
  */
 interface SessionMeta {
   role: Role;
@@ -51,9 +57,10 @@ interface SessionMeta {
 const META_STORAGE_KEY = 'hrd-session-meta';
 
 /**
- * Role assumed when a live session cookie exists but nothing remembers its
- * role: the console only opens for HRD accounts, so anything unknown is
- * treated as an employee session and lands on the access-denied view.
+ * Role assumed when a live session cookie exists but neither the profile nor
+ * the remembered flags name one: the console only opens for HRD accounts, so
+ * anything unknown is treated as an employee session and lands on the
+ * access-denied view.
  */
 const FALLBACK_ROLE: Role = 'employee';
 
@@ -136,9 +143,11 @@ export async function logout(): Promise<void> {
 /**
  * Bootstraps the session by probing the profile endpoint: a 401 means nobody
  * is signed in (`null`), any other failure rejects so callers do not mistake
- * a network problem for an expired session. Role flags come from the payload
- * when present, otherwise from the flags remembered at sign-in, otherwise
- * from the employee default this console denies by design.
+ * a network problem for an expired session. The probe payload decides the
+ * role whenever it carries one — that is the path every session takes, with
+ * or without anything this tab previously remembered. The stored flags are
+ * consulted only when the payload omits them, and when nothing at all knows
+ * the role the console denies by design.
  */
 export async function fetchSession(): Promise<Session | null> {
   let profile: ProfileProbe;
