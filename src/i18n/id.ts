@@ -157,6 +157,7 @@ export const id = {
   'alert.changedFields': 'mengubah {fields}',
   'alert.passwordLine': 'Kata sandi diubah',
   'alert.dismiss': 'Tutup notifikasi',
+  'alert.more': '+{count} lainnya',
   'alert.field.phone': 'nomor telepon',
   'alert.field.photo': 'foto',
   'alert.field.password': 'kata sandi',

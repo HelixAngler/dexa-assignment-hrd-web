@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EmployeeForm, type EmployeeFormValues } from '../components';
+import { AlertIcon, EyeIcon } from '../components/icons';
 import { ServerErrorState, useSuccessToast } from '../components/states';
 import { useI18n } from '../i18n/provider';
 import { ApiError } from '../services/api';
@@ -9,6 +10,14 @@ import {
   type EmployeeCreated,
   type EmployeeCreateInput,
 } from '../services/employees';
+
+/** Outlined action: visible and tappable, but never the dominant one. */
+const secondaryButtonClassName =
+  'inline-flex min-h-[44px] items-center justify-center rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-[var(--color-surface)] px-[var(--space-md)] font-semibold text-[color:var(--color-text)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)] hover:bg-[var(--color-page)]';
+
+/** The one filled action of its screen. */
+const primaryButtonClassName =
+  'inline-flex min-h-[44px] items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-[var(--space-lg)] font-semibold text-[color:var(--color-on-primary)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)] hover:bg-[var(--color-primary-hover)]';
 
 /** Alphabet without look-alike characters, used for the local preview only. */
 const PREVIEW_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789-';
@@ -111,25 +120,29 @@ export default function KaryawanAddPage() {
   if (issued !== null) {
     return (
       <section data-testid="karyawan-add" className="mx-auto max-w-2xl">
-        <h1 className="text-xl font-semibold text-gray-900">
+        <h1 className="font-bold text-[color:var(--color-text-strong)] [font-size:var(--text-xl)] [line-height:var(--text-xl-line-height)]">
           {t('karyawan.add.createdTitle')}
         </h1>
-        <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4">
-          <p className="text-sm font-medium text-green-900">
-            {t('karyawan.add.createdPasswordLabel')}
+        <div className="mt-[var(--space-xl)] flex flex-col gap-[var(--space-lg)] rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-[var(--color-success-bg)] p-[var(--space-lg)] shadow-[var(--shadow-card)]">
+          <p className="flex items-center gap-[var(--space-sm)] font-semibold text-[color:var(--color-success)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
+            <EyeIcon size={20} className="shrink-0" />
+            <span>{t('karyawan.add.createdPasswordLabel')}</span>
           </p>
           <code
             data-testid="temporary-password"
-            className="mt-2 block break-all rounded-md border border-green-300 bg-white px-3 py-2 font-mono text-base text-gray-900"
+            className="block w-full break-all rounded-[var(--radius-sm)] border border-[color:var(--color-border)] bg-[var(--color-surface)] px-[var(--space-md)] py-[var(--space-md)] font-mono tracking-[0.04em] text-[color:var(--color-text-strong)] [font-size:var(--text-body)] [line-height:var(--text-body-line-height)]"
           >
             {issued.temporaryPassword}
           </code>
-          <div className="mt-3 flex flex-wrap gap-2">
+          <p className="text-[color:var(--color-text-muted)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
+            {t('karyawan.add.createdGuidance')}
+          </p>
+          <div className="flex flex-wrap gap-[var(--space-md)]">
             <button
               type="button"
               data-testid="copy-password"
               onClick={() => void handleCopy()}
-              className="min-h-[44px] rounded-md bg-green-700 px-4 text-sm font-semibold text-white hover:bg-green-800"
+              className={secondaryButtonClassName}
             >
               {copied ? t('karyawan.add.createdCopied') : t('karyawan.add.createdCopy')}
             </button>
@@ -137,14 +150,11 @@ export default function KaryawanAddPage() {
               type="button"
               data-testid="created-done"
               onClick={() => navigate('/karyawan')}
-              className="min-h-[44px] rounded-md border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-100"
+              className={primaryButtonClassName}
             >
               {t('karyawan.add.createdDone')}
             </button>
           </div>
-          <p className="mt-3 text-sm text-green-900">
-            {t('karyawan.add.createdGuidance')}
-          </p>
         </div>
         {toast.toast}
       </section>
@@ -153,11 +163,11 @@ export default function KaryawanAddPage() {
 
   return (
     <section data-testid="karyawan-add" className="mx-auto max-w-2xl">
-      <h1 className="text-xl font-semibold text-gray-900">
+      <h1 className="font-bold text-[color:var(--color-text-strong)] [font-size:var(--text-xl)] [line-height:var(--text-xl-line-height)]">
         {t('karyawan.add.title')}
       </h1>
 
-      <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4">
+      <div className="mt-[var(--space-xl)] flex flex-col gap-[var(--space-lg)] rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-[var(--color-surface)] p-[var(--space-lg)] shadow-[var(--shadow-card)]">
         <EmployeeForm
           mode="add"
           pending={pending}
@@ -167,35 +177,41 @@ export default function KaryawanAddPage() {
           notice={
             <div
               data-testid="temp-password-preview"
-              className="rounded-md border border-gray-200 bg-gray-50 p-3"
+              className="flex flex-col gap-[var(--space-xl)]"
             >
-              <label
-                htmlFor="temp-password-preview"
-                className="block text-sm font-medium text-gray-700"
-              >
-                {t('karyawan.add.passwordLabel')}
-              </label>
-              <input
-                id="temp-password-preview"
-                data-testid="temp-password-preview-input"
-                type="text"
-                readOnly
-                value={previewPassword}
-                className="mt-1 h-11 w-full rounded-md border border-gray-300 bg-white px-3 font-mono text-sm text-gray-900"
-              />
-              <button
-                type="button"
-                data-testid="regenerate-password"
-                onClick={() => setPreviewPassword(generatePreviewPassword())}
-                className="mt-2 min-h-[44px] rounded-md border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-100"
-              >
-                {t('karyawan.add.passwordRegenerate')}
-              </button>
-              <p className="mt-2 text-sm text-gray-500">
-                {t('karyawan.add.passwordPreviewNote')}
-              </p>
-              <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-900">
-                {t('karyawan.add.forcedChangeNote')}
+              <hr className="w-full border-0 border-t border-[color:var(--color-border)]" />
+              <div className="flex flex-col gap-[var(--space-xs)]">
+                <div className="flex flex-wrap items-center justify-between gap-[var(--space-sm)]">
+                  <label
+                    htmlFor="temp-password-preview"
+                    className="font-medium text-[color:var(--color-text)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]"
+                  >
+                    {t('karyawan.add.passwordLabel')}
+                  </label>
+                  <button
+                    type="button"
+                    data-testid="regenerate-password"
+                    onClick={() => setPreviewPassword(generatePreviewPassword())}
+                    className={secondaryButtonClassName}
+                  >
+                    {t('karyawan.add.passwordRegenerate')}
+                  </button>
+                </div>
+                <input
+                  id="temp-password-preview"
+                  data-testid="temp-password-preview-input"
+                  type="text"
+                  readOnly
+                  value={previewPassword}
+                  className="min-h-[44px] w-full rounded-[var(--radius-sm)] border border-[color:var(--color-border)] bg-[var(--color-surface)] px-[var(--space-md)] font-mono tracking-[0.04em] text-[color:var(--color-text-strong)] [font-size:var(--text-body)] [line-height:var(--text-body-line-height)] focus:border-[color:var(--color-primary)] focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--color-primary)]"
+                />
+                <p className="text-[color:var(--color-text-muted)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
+                  {t('karyawan.add.passwordPreviewNote')}
+                </p>
+              </div>
+              <p className="flex items-start gap-[var(--space-sm)] rounded-[var(--radius-sm)] bg-[var(--color-attention-bg)] px-[var(--space-md)] py-[var(--space-sm)] font-medium text-[color:var(--color-attention)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
+                <AlertIcon size={20} className="mt-[var(--space-xs)] shrink-0" />
+                <span>{t('karyawan.add.forcedChangeNote')}</span>
               </p>
             </div>
           }
@@ -203,7 +219,7 @@ export default function KaryawanAddPage() {
       </div>
 
       {fault && (
-        <div className="mt-4">
+        <div className="mt-[var(--space-xl)]">
           <ServerErrorState
             title={t('form.error.save')}
             onRetry={() => {

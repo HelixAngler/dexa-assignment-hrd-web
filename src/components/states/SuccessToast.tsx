@@ -4,6 +4,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { CheckIcon, CloseIcon } from '../icons';
 import { useI18n } from '../../i18n/provider';
 
 /** Auto-dismiss delay for success toasts. */
@@ -59,15 +60,16 @@ export default function SuccessToast({
     <div
       data-testid="success-toast"
       role="status"
-      className="fixed left-1/2 top-4 z-50 flex w-[min(92vw,420px)] -translate-x-1/2 items-center gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3 shadow-lg"
+      aria-live="polite"
+      className="fixed left-1/2 top-4 z-50 flex w-[min(92vw,420px)] -translate-x-1/2 items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-success)] bg-[var(--color-success-bg)] px-4 py-3 shadow-[var(--shadow-raised)]"
     >
       <span
         aria-hidden="true"
-        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-600 text-sm font-bold text-white"
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-success)] text-[var(--color-on-primary)]"
       >
-        ✓
+        <CheckIcon size={14} />
       </span>
-      <span className="min-w-0 flex-1 break-words text-sm font-medium text-green-900">
+      <span className="min-w-0 flex-1 break-words text-sm font-medium text-[var(--color-text-strong)]">
         {message}
       </span>
       <button
@@ -75,9 +77,9 @@ export default function SuccessToast({
         data-testid="success-toast-dismiss"
         aria-label={t('state.success.dismiss')}
         onClick={dismiss}
-        className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded text-green-800 hover:bg-green-100"
+        className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-strong)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] hover:bg-[var(--color-border)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
       >
-        <span aria-hidden="true">✕</span>
+        <CloseIcon size={16} aria-hidden="true" />
       </button>
     </div>
   );

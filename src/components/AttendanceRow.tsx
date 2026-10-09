@@ -28,10 +28,14 @@ const STATUS_KEY: Record<AttendanceState, DictKey> = {
 
 /** Status colour pairing; the three states read apart without the word alone. */
 const STATUS_CLASS: Record<AttendanceState, string> = {
-  done: 'bg-green-100 text-green-800',
-  open: 'bg-blue-100 text-blue-800',
-  '-': 'bg-gray-200 text-gray-600',
+  done: 'bg-[var(--color-success-bg)] text-[color:var(--color-success)]',
+  open: 'border border-[color:var(--color-border)] bg-[var(--color-page)] text-[color:var(--color-text)]',
+  '-': 'bg-[var(--color-attention-bg)] text-[color:var(--color-attention)]',
 };
+
+/** Shared pill shell every status label and open-session mark wears. */
+const pillClassName =
+  'inline-flex items-center gap-[var(--space-xs)] whitespace-nowrap rounded-[var(--radius-full)] px-[var(--space-md)] py-[var(--space-xs)] font-semibold [font-size:var(--text-xs)] [line-height:var(--text-xs-line-height)]';
 
 /** Locale tag for the clock rendering in each UI language. */
 function localeTag(lang: Lang): string {
@@ -82,7 +86,7 @@ function PulangValue({ row }: CellProps) {
     return (
       <span
         data-testid="attendance-still-working"
-        className="italic text-gray-500"
+        className={[pillClassName, STATUS_CLASS.open].join(' ')}
       >
         {t('absensi.row.stillWorking')}
       </span>
@@ -99,10 +103,7 @@ function StatusLabel({ row }: CellProps) {
     <span
       data-testid="attendance-status"
       data-state={row.state}
-      className={[
-        'inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold',
-        STATUS_CLASS[row.state],
-      ].join(' ')}
+      className={[pillClassName, STATUS_CLASS[row.state]].join(' ')}
     >
       {t(STATUS_KEY[row.state])}
     </span>
@@ -111,29 +112,34 @@ function StatusLabel({ row }: CellProps) {
 
 /** Wide-screen half: one table row of name, masuk, pulang and status. */
 function AttendanceTableRow({ row }: CellProps) {
+  const cellClass =
+    'h-[48px] border-b border-[color:var(--color-border)] px-[var(--space-md)] align-middle';
+
   return (
     <tr
       data-testid="attendance-row"
       data-state={row.state}
       data-employee-id={row.employeeId}
-      className="text-gray-900"
+      className="even:bg-[var(--color-page)]"
     >
-      <td className="py-2 pr-4 font-medium break-words text-gray-900">
+      <td
+        className={`${cellClass} break-words font-semibold text-[color:var(--color-text-strong)]`}
+      >
         {row.name}
       </td>
       <td
         data-testid="attendance-masuk"
-        className="py-2 pr-4 tabular-nums text-gray-700"
+        className={`${cellClass} tabular-nums text-[color:var(--color-text)]`}
       >
         <MasukValue row={row} />
       </td>
       <td
         data-testid="attendance-pulang"
-        className="py-2 pr-4 tabular-nums text-gray-700"
+        className={`${cellClass} tabular-nums text-[color:var(--color-text)]`}
       >
         <PulangValue row={row} />
       </td>
-      <td className="py-2">
+      <td className={cellClass}>
         <StatusLabel row={row} />
       </td>
     </tr>
@@ -149,33 +155,33 @@ function AttendanceCard({ row }: CellProps) {
       data-testid="attendance-card"
       data-state={row.state}
       data-employee-id={row.employeeId}
-      className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+      className="flex flex-col gap-[var(--space-xs)] rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-[var(--color-surface)] p-[var(--space-lg)] shadow-[var(--shadow-card)]"
     >
-      <p className="break-words text-sm font-semibold text-gray-900">
+      <p className="break-words font-semibold text-[color:var(--color-text-strong)] [font-size:var(--text-body)] [line-height:var(--text-body-line-height)]">
         {row.name}
       </p>
-      <dl className="mt-2 space-y-1 text-sm">
-        <div className="flex items-baseline justify-between gap-3">
-          <dt className="text-gray-500">{t('absensi.column.masuk')}</dt>
+      <dl className="flex flex-col gap-[var(--space-xs)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
+        <div className="flex items-baseline justify-between gap-[var(--space-md)]">
+          <dt className="text-[color:var(--color-text-muted)]">{t('absensi.column.masuk')}</dt>
           <dd
             data-testid="attendance-masuk"
-            className="tabular-nums text-gray-900"
+            className="tabular-nums text-right text-[color:var(--color-text-strong)]"
           >
             <MasukValue row={row} />
           </dd>
         </div>
-        <div className="flex items-baseline justify-between gap-3">
-          <dt className="text-gray-500">{t('absensi.column.pulang')}</dt>
+        <div className="flex items-baseline justify-between gap-[var(--space-md)]">
+          <dt className="text-[color:var(--color-text-muted)]">{t('absensi.column.pulang')}</dt>
           <dd
             data-testid="attendance-pulang"
-            className="tabular-nums text-gray-900"
+            className="tabular-nums text-right text-[color:var(--color-text-strong)]"
           >
             <PulangValue row={row} />
           </dd>
         </div>
-        <div className="flex items-baseline justify-between gap-3">
-          <dt className="text-gray-500">{t('absensi.column.status')}</dt>
-          <dd className="text-gray-900">
+        <div className="flex items-baseline justify-between gap-[var(--space-md)]">
+          <dt className="text-[color:var(--color-text-muted)]">{t('absensi.column.status')}</dt>
+          <dd className="text-right text-[color:var(--color-text-strong)]">
             <StatusLabel row={row} />
           </dd>
         </div>

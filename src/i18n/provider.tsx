@@ -112,7 +112,7 @@ export function LanguageToggle() {
       aria-label={t('shell.toggleLanguage')}
       title={t('shell.toggleLanguage')}
       onClick={toggle}
-      className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md px-2 text-sm font-semibold text-gray-600 hover:bg-gray-100 hover:text-blue-700"
+      className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] px-2 text-sm font-semibold text-[var(--color-text)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] hover:bg-[var(--color-page)] hover:text-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
     >
       {LANG_CODES[target]}
     </button>

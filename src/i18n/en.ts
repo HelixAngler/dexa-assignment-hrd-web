@@ -157,6 +157,7 @@ export const en: Record<DictKey, string> = {
   'alert.changedFields': 'changed {fields}',
   'alert.passwordLine': 'Password changed',
   'alert.dismiss': 'Dismiss alert',
+  'alert.more': '+{count} more',
   'alert.field.phone': 'phone',
   'alert.field.photo': 'photo',
   'alert.field.password': 'password',

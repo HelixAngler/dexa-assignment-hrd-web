@@ -47,7 +47,7 @@ export const routeTable: RouteObject[] = [
 /** Centres full-viewport states on the page background, without app chrome. */
 function FullPage({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-gray-50 px-4">
+    <div className="relative flex min-h-screen items-center justify-center bg-[var(--color-page)] px-4">
       <div className="absolute right-4 top-4">
         <LanguageToggle />
       </div>

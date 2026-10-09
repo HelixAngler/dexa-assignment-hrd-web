@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { z } from 'zod';
 import type { DictKey } from '../i18n/id';
 import { useI18n } from '../i18n/provider';
+import { AlertIcon } from './icons';
 
 /** The five fields the create and update payloads carry. */
 export interface EmployeeFormValues {
@@ -182,11 +183,11 @@ export default function EmployeeForm({
 
   const inputClass = (hasError: boolean) =>
     [
-      'h-11 w-full rounded-md border px-3 text-sm text-gray-900',
-      'focus:outline-none focus:ring-1',
+      'min-h-[44px] w-full rounded-[var(--radius-sm)] bg-[var(--color-surface)] px-[var(--space-md)] text-[color:var(--color-text-strong)] [font-size:var(--text-body)] [line-height:var(--text-body-line-height)]',
+      'focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--color-primary)]',
       hasError
-        ? 'border-red-400 focus:border-red-600 focus:ring-red-600'
-        : 'border-gray-300 focus:border-blue-600 focus:ring-blue-600',
+        ? 'border border-[color:var(--color-danger)] focus:border-[color:var(--color-danger)]'
+        : 'border border-[color:var(--color-border)] focus:border-[color:var(--color-primary)]',
     ].join(' ');
 
   const errorText = (field: EmployeeField): string | null => {
@@ -205,9 +206,11 @@ export default function EmployeeForm({
     return (
       <p
         data-testid={`error-${field}`}
-        className="mt-1 text-sm font-medium text-red-700"
+        role="alert"
+        className="flex items-start gap-[var(--space-sm)] rounded-[var(--radius-sm)] bg-[var(--color-danger-bg)] px-[var(--space-md)] py-[var(--space-sm)] font-medium text-[color:var(--color-danger)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]"
       >
-        {text}
+        <AlertIcon size={20} className="mt-[var(--space-xs)] shrink-0" />
+        <span>{text}</span>
       </p>
     );
   };
@@ -217,10 +220,10 @@ export default function EmployeeForm({
       data-testid="employee-form"
       onSubmit={handleSubmit}
       noValidate
-      className="space-y-4"
+      className="flex flex-col gap-[var(--space-xl)]"
     >
-      <div>
-        <label htmlFor="employee-name" className="block text-sm font-medium text-gray-700">
+      <div className="flex flex-col gap-[var(--space-xs)]">
+        <label htmlFor="employee-name" className="font-medium text-[color:var(--color-text)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
           {t('form.name')}
         </label>
         <input
@@ -232,13 +235,13 @@ export default function EmployeeForm({
           value={values.name}
           onChange={(event) => setField('name', event.target.value)}
           aria-invalid={fieldErrors.name !== undefined}
-          className={`mt-1 ${inputClass(fieldErrors.name !== undefined)}`}
+          className={inputClass(fieldErrors.name !== undefined)}
         />
         {renderError('name')}
       </div>
 
-      <div>
-        <label htmlFor="employee-email" className="block text-sm font-medium text-gray-700">
+      <div className="flex flex-col gap-[var(--space-xs)]">
+        <label htmlFor="employee-email" className="font-medium text-[color:var(--color-text)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
           {t('form.email')}
         </label>
         <input
@@ -250,15 +253,15 @@ export default function EmployeeForm({
           value={values.email}
           onChange={(event) => setField('email', event.target.value)}
           aria-invalid={fieldErrors.email !== undefined || showEmailTaken}
-          className={`mt-1 ${inputClass(
+          className={inputClass(
             fieldErrors.email !== undefined || showEmailTaken,
-          )}`}
+          )}
         />
         {renderError('email')}
       </div>
 
-      <div>
-        <label htmlFor="employee-position" className="block text-sm font-medium text-gray-700">
+      <div className="flex flex-col gap-[var(--space-xs)]">
+        <label htmlFor="employee-position" className="font-medium text-[color:var(--color-text)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
           {t('form.position')}
         </label>
         <input
@@ -269,13 +272,15 @@ export default function EmployeeForm({
           value={values.position}
           onChange={(event) => setField('position', event.target.value)}
           aria-invalid={fieldErrors.position !== undefined}
-          className={`mt-1 ${inputClass(fieldErrors.position !== undefined)}`}
+          className={inputClass(fieldErrors.position !== undefined)}
         />
         {renderError('position')}
       </div>
 
-      <div>
-        <label htmlFor="employee-phone" className="block text-sm font-medium text-gray-700">
+      <hr className="w-full border-0 border-t border-[color:var(--color-border)]" />
+
+      <div className="flex flex-col gap-[var(--space-xs)]">
+        <label htmlFor="employee-phone" className="font-medium text-[color:var(--color-text)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
           {t('form.phone')}
         </label>
         <input
@@ -287,16 +292,16 @@ export default function EmployeeForm({
           value={values.phone}
           onChange={(event) => setField('phone', event.target.value)}
           aria-invalid={fieldErrors.phone !== undefined}
-          className={`mt-1 ${inputClass(fieldErrors.phone !== undefined)}`}
+          className={inputClass(fieldErrors.phone !== undefined)}
         />
         {renderError('phone')}
         {mode === 'edit' && values.phone === '' && (
-          <p className="mt-1 text-sm text-gray-500">{t('form.phoneKeepHint')}</p>
+          <p className="text-[color:var(--color-text-muted)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">{t('form.phoneKeepHint')}</p>
         )}
       </div>
 
-      <div>
-        <label htmlFor="employee-photo" className="block text-sm font-medium text-gray-700">
+      <div className="flex flex-col gap-[var(--space-xs)]">
+        <label htmlFor="employee-photo" className="font-medium text-[color:var(--color-text)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
           {t('form.photo')}
         </label>
         <input
@@ -306,9 +311,9 @@ export default function EmployeeForm({
           value={values.photo}
           onChange={(event) => setField('photo', event.target.value)}
           aria-describedby="employee-photo-hint"
-          className={`mt-1 ${inputClass(false)}`}
+          className={inputClass(false)}
         />
-        <p id="employee-photo-hint" className="mt-1 text-sm text-gray-500">
+        <p id="employee-photo-hint" className="text-[color:var(--color-text-muted)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
           {t('form.photoHint')}
         </p>
       </div>
@@ -320,7 +325,7 @@ export default function EmployeeForm({
         data-testid="employee-form-submit"
         disabled={pending}
         aria-busy={pending}
-        className="min-h-[44px] w-full rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60 sm:w-auto"
+        className="inline-flex min-h-[44px] w-full items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-[var(--space-lg)] font-semibold text-[color:var(--color-on-primary)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)] hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:bg-[var(--color-border)] disabled:text-[color:var(--color-text-muted)] sm:w-auto"
       >
         {mode === 'add' ? t('form.submit.add') : t('form.submit.save')}
       </button>

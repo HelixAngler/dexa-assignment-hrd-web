@@ -7,6 +7,7 @@ import {
   ServerErrorState,
   type EmployeeFormValues,
 } from '../components';
+import { EyeIcon } from '../components/icons';
 import { useSuccessToast } from '../components/states';
 import { useI18n } from '../i18n/provider';
 import { ApiError } from '../services/api';
@@ -25,6 +26,30 @@ type LoadState = 'loading' | 'ready' | 'error' | 'missing';
 
 /** Which action the shared server-error state is currently waiting on. */
 type FailedAction = 'save' | 'status' | 'reset' | null;
+
+/** Surface every card on the screen rests on: border, radius, elevation. */
+const cardClassName =
+  'flex flex-col gap-[var(--space-lg)] rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-[var(--color-surface)] p-[var(--space-lg)] shadow-[var(--shadow-card)]';
+
+/** Outlined action: visible and tappable, but never the dominant one. */
+const secondaryButtonClassName =
+  'inline-flex min-h-[44px] items-center justify-center rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-[var(--color-surface)] px-[var(--space-md)] font-semibold text-[color:var(--color-text)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)] hover:bg-[var(--color-page)] disabled:cursor-not-allowed disabled:bg-[var(--color-border)] disabled:text-[color:var(--color-text-muted)]';
+
+/** Filled brand action for the screen's one primary commitment. */
+const primaryButtonClassName =
+  'inline-flex min-h-[44px] items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-[var(--space-lg)] font-semibold text-[color:var(--color-on-primary)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)] hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:bg-[var(--color-border)] disabled:text-[color:var(--color-text-muted)]';
+
+/** Filled destructive action, only inside the confirmation panel that asks. */
+const dangerButtonClassName =
+  'inline-flex min-h-[44px] items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-danger)] px-[var(--space-lg)] font-semibold text-[color:var(--color-on-primary)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)] disabled:cursor-not-allowed disabled:bg-[var(--color-border)] disabled:text-[color:var(--color-text-muted)]';
+
+/** Status choice rendered as a ≥44 px pill with the selection painted on it. */
+const radioPillClassName =
+  'relative inline-flex min-h-[44px] cursor-pointer items-center gap-[var(--space-sm)] rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-[var(--color-surface)] px-[var(--space-md)] font-medium text-[color:var(--color-text)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)] has-[input:checked]:border-[color:var(--color-primary)] has-[input:checked]:bg-[var(--color-primary-subtle)] has-[input:checked]:font-semibold has-[input:checked]:text-[color:var(--color-primary)]';
+
+/** Visual radio dot drawn over the transparent full-pill native input. */
+const radioDotClassName =
+  'h-4 w-4 shrink-0 rounded-full border-2 border-[color:var(--color-border)] bg-[var(--color-surface)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] peer-checked:border-[color:var(--color-primary)] peer-checked:bg-[var(--color-primary)] peer-checked:shadow-[inset_0_0_0_3px_var(--color-surface)]';
 
 /**
  * Maps validated form values onto the patch payload: required identity
@@ -198,8 +223,11 @@ export default function KaryawanEditPage() {
   const selectedStatus = statusChoice ?? employee?.status ?? 'active';
 
   return (
-    <section data-testid="karyawan-edit" className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-xl font-semibold text-gray-900">
+    <section
+      data-testid="karyawan-edit"
+      className="mx-auto max-w-2xl space-y-[var(--space-xl)]"
+    >
+      <h1 className="font-bold text-[color:var(--color-text-strong)] [font-size:var(--text-xl)] [line-height:var(--text-xl-line-height)]">
         {t('karyawan.edit.title')}
       </h1>
 
@@ -222,7 +250,7 @@ export default function KaryawanEditPage() {
               type="button"
               data-testid="not-found-back"
               onClick={() => navigate('/karyawan')}
-              className="mt-2 min-h-[44px] rounded-md bg-gray-800 px-4 text-sm font-medium text-white hover:bg-gray-900"
+              className={primaryButtonClassName}
             >
               {t('karyawan.edit.notFoundBack')}
             </button>
@@ -232,7 +260,7 @@ export default function KaryawanEditPage() {
 
       {loadState === 'ready' && employee !== null && (
         <>
-          <div className="rounded-lg border border-gray-200 bg-white p-4">
+          <div className={cardClassName}>
             <EmployeeForm
               mode="edit"
               pending={formPending}
@@ -253,15 +281,12 @@ export default function KaryawanEditPage() {
             />
           </div>
 
-          <div
-            data-testid="status-card"
-            className="rounded-lg border border-gray-200 bg-white p-4"
-          >
-            <h2 className="text-base font-semibold text-gray-900">
+          <div data-testid="status-card" className={cardClassName}>
+            <h2 className="font-semibold text-[color:var(--color-text-strong)] [font-size:var(--text-body)] [line-height:var(--text-body-line-height)]">
               {t('karyawan.edit.statusTitle')}
             </h2>
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:gap-6">
-              <label className="flex min-h-[44px] items-center gap-2 text-sm text-gray-800">
+            <div className="flex flex-wrap gap-[var(--space-md)]">
+              <label className={radioPillClassName}>
                 <input
                   type="radio"
                   name="employee-status"
@@ -271,11 +296,12 @@ export default function KaryawanEditPage() {
                     setStatusChoice('active');
                     setConfirmingStatus(false);
                   }}
-                  className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600"
+                  className="peer absolute -inset-px cursor-pointer appearance-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--color-primary)]"
                 />
+                <span aria-hidden="true" className={radioDotClassName} />
                 {t('karyawan.status.active')}
               </label>
-              <label className="flex min-h-[44px] items-center gap-2 text-sm text-gray-800">
+              <label className={radioPillClassName}>
                 <input
                   type="radio"
                   name="employee-status"
@@ -285,8 +311,9 @@ export default function KaryawanEditPage() {
                     setStatusChoice('deactivated');
                     setConfirmingStatus(false);
                   }}
-                  className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-600"
+                  className="peer absolute -inset-px cursor-pointer appearance-none focus:outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--color-primary)]"
                 />
+                <span aria-hidden="true" className={radioDotClassName} />
                 {t('karyawan.status.deactivated')}
               </label>
             </div>
@@ -294,21 +321,21 @@ export default function KaryawanEditPage() {
             {confirmingStatus ? (
               <div
                 data-testid="status-confirm"
-                className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3"
+                className="flex flex-col gap-[var(--space-md)] rounded-[var(--radius-md)] border border-[color:var(--color-attention)] bg-[var(--color-attention-bg)] p-[var(--space-lg)]"
               >
-                <p className="text-sm font-semibold text-amber-900">
+                <p className="font-bold text-[color:var(--color-text-strong)] [font-size:var(--text-body)] [line-height:var(--text-body-line-height)]">
                   {t('karyawan.edit.statusConfirmTitle')}
                 </p>
-                <p className="mt-1 text-sm text-amber-800">
+                <p className="text-[color:var(--color-text)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
                   {t('karyawan.edit.statusConfirmBody')}
                 </p>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-[var(--space-md)]">
                   <button
                     type="button"
                     data-testid="status-confirm-yes"
                     disabled={statusPending}
                     onClick={() => commitStatus('deactivated')}
-                    className="min-h-[44px] rounded-md bg-red-700 px-4 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-60"
+                    className={dangerButtonClassName}
                   >
                     {t('karyawan.edit.statusConfirm')}
                   </button>
@@ -317,70 +344,74 @@ export default function KaryawanEditPage() {
                     data-testid="status-confirm-cancel"
                     disabled={statusPending}
                     onClick={() => setConfirmingStatus(false)}
-                    className="min-h-[44px] rounded-md border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-100"
+                    className={secondaryButtonClassName}
                   >
                     {t('karyawan.edit.statusCancel')}
                   </button>
                 </div>
               </div>
             ) : (
-              <button
-                type="button"
-                data-testid="status-apply"
-                disabled={statusPending || statusChoice === employee.status}
-                onClick={handleApplyStatus}
-                className="mt-3 min-h-[44px] rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
-              >
-                {t('karyawan.edit.statusApply')}
-              </button>
+              <div className="flex flex-wrap gap-[var(--space-md)]">
+                <button
+                  type="button"
+                  data-testid="status-apply"
+                  disabled={statusPending || statusChoice === employee.status}
+                  onClick={handleApplyStatus}
+                  className={secondaryButtonClassName}
+                >
+                  {t('karyawan.edit.statusApply')}
+                </button>
+              </div>
             )}
           </div>
 
-          <div
-            data-testid="password-card"
-            className="rounded-lg border border-gray-200 bg-white p-4"
-          >
-            <h2 className="text-base font-semibold text-gray-900">
+          <div data-testid="password-card" className={cardClassName}>
+            <h2 className="font-semibold text-[color:var(--color-text-strong)] [font-size:var(--text-body)] [line-height:var(--text-body-line-height)]">
               {t('karyawan.edit.resetTitle')}
             </h2>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="text-[color:var(--color-text-muted)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
               {t('karyawan.edit.resetHint')}
             </p>
-            <button
-              type="button"
-              data-testid="reset-password"
-              disabled={resetting}
-              onClick={() => void handleResetPassword()}
-              className="mt-3 min-h-[44px] rounded-md border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-100 disabled:opacity-60"
-            >
-              {t('karyawan.edit.resetAction')}
-            </button>
+            <div className="flex flex-wrap gap-[var(--space-md)]">
+              <button
+                type="button"
+                data-testid="reset-password"
+                disabled={resetting}
+                onClick={() => void handleResetPassword()}
+                className={secondaryButtonClassName}
+              >
+                {t('karyawan.edit.resetAction')}
+              </button>
+            </div>
 
             {revealedPassword !== null && (
               <div
                 data-testid="reset-reveal"
-                className="mt-3 rounded-md border border-green-200 bg-green-50 p-3"
+                className="flex flex-col gap-[var(--space-md)] rounded-[var(--radius-md)] bg-[var(--color-success-bg)] p-[var(--space-lg)]"
               >
-                <p className="text-sm font-medium text-green-900">
-                  {t('karyawan.edit.resetRevealTitle')}
+                <p className="flex items-center gap-[var(--space-sm)] font-semibold text-[color:var(--color-success)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
+                  <EyeIcon size={20} className="shrink-0" />
+                  <span>{t('karyawan.edit.resetRevealTitle')}</span>
                 </p>
                 <code
                   data-testid="temporary-password"
-                  className="mt-2 block break-all rounded-md border border-green-300 bg-white px-3 py-2 font-mono text-base text-gray-900"
+                  className="block w-full break-all rounded-[var(--radius-sm)] border border-[color:var(--color-border)] bg-[var(--color-surface)] px-[var(--space-md)] py-[var(--space-md)] font-mono tracking-[0.04em] text-[color:var(--color-text-strong)] [font-size:var(--text-body)] [line-height:var(--text-body-line-height)]"
                 >
                   {revealedPassword}
                 </code>
-                <p className="mt-2 text-sm text-green-900">
+                <p className="text-[color:var(--color-text-muted)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
                   {t('karyawan.edit.resetGuidance')}
                 </p>
-                <button
-                  type="button"
-                  data-testid="reset-close"
-                  onClick={() => setRevealedPassword(null)}
-                  className="mt-3 min-h-[44px] rounded-md bg-green-700 px-4 text-sm font-semibold text-white hover:bg-green-800"
-                >
-                  {t('karyawan.edit.resetClose')}
-                </button>
+                <div className="flex flex-wrap gap-[var(--space-md)]">
+                  <button
+                    type="button"
+                    data-testid="reset-close"
+                    onClick={() => setRevealedPassword(null)}
+                    className={secondaryButtonClassName}
+                  >
+                    {t('karyawan.edit.resetClose')}
+                  </button>
+                </div>
               </div>
             )}
           </div>

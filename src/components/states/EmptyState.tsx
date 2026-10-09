@@ -15,6 +15,8 @@ export interface EmptyStateProps {
 /**
  * Explains why a list or table is blank instead of showing nothing. Callers
  * translate `title`/`description` via `t()` when they override the defaults.
+ * The block reserves a fixed minimum height so swapping it in never shifts
+ * the page around it.
  */
 export default function EmptyState({
   icon,
@@ -27,16 +29,16 @@ export default function EmptyState({
   return (
     <section
       data-testid="empty-state"
-      className="flex min-h-[180px] flex-col items-center justify-center gap-2 px-4 py-8 text-center"
+      className="mx-auto flex min-h-[240px] w-full max-w-[48ch] flex-col items-center justify-center gap-3 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-8 text-center shadow-[var(--shadow-card)]"
     >
-      <span aria-hidden="true" className="text-gray-400">
+      <span aria-hidden="true" className="text-[var(--color-text-muted)]">
         {icon ?? (
           <svg
             viewBox="0 0 48 48"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
-            className="h-12 w-12"
+            strokeWidth="3"
+            className="h-8 w-8"
             data-testid="empty-state-default-icon"
           >
             <rect x="8" y="12" width="32" height="26" rx="3" />
@@ -45,10 +47,10 @@ export default function EmptyState({
           </svg>
         )}
       </span>
-      <h2 className="text-base font-semibold text-gray-800">
+      <h2 className="text-lg font-semibold leading-7 text-[var(--color-text-strong)]">
         {title ?? t('state.empty.title')}
       </h2>
-      <p className="max-w-md text-sm text-gray-500">
+      <p className="max-w-md text-sm leading-5 text-[var(--color-text)]">
         {description ?? t('state.empty.description')}
       </p>
       {action}

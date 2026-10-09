@@ -1,3 +1,4 @@
+import { AlertIcon } from '../icons';
 import { useI18n } from '../../i18n/provider';
 
 export interface ServerErrorStateProps {
@@ -11,7 +12,9 @@ export interface ServerErrorStateProps {
 
 /**
  * Shown when a request fails. The copy explicitly reassures the user that no
- * data changed, and a retry button offers the way forward.
+ * data changed, and a retry button offers the way forward. The tinted block
+ * reserves a fixed minimum height, and the headline sits on the light tint so
+ * it stays well above the contrast floor.
  */
 export default function ServerErrorState({
   onRetry,
@@ -24,19 +27,20 @@ export default function ServerErrorState({
     <section
       data-testid="server-error-state"
       role="alert"
-      className="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-lg border border-red-100 bg-red-50 px-4 py-8 text-center"
+      className="mx-auto flex min-h-[240px] w-full max-w-[48ch] flex-col items-center justify-center gap-3 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-danger-bg)] px-4 py-8 text-center shadow-[var(--shadow-card)]"
     >
-      <h2 className="text-base font-semibold text-red-800">
+      <AlertIcon size={32} className="text-[var(--color-danger)]" />
+      <h2 className="text-lg font-semibold leading-7 text-[var(--color-text-strong)]">
         {title ?? t('state.serverError.title')}
       </h2>
-      <p className="max-w-md text-sm text-red-700">
+      <p className="max-w-md text-sm leading-5 text-[var(--color-text)]">
         {description ?? t('state.serverError.description')}
       </p>
       <button
         type="button"
         data-testid="retry-button"
         onClick={() => onRetry?.()}
-        className="min-h-[44px] rounded-md bg-red-700 px-4 text-sm font-medium text-white hover:bg-red-800"
+        className="min-h-[44px] rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-sm font-semibold leading-5 text-[var(--color-on-primary)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] hover:bg-[var(--color-primary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
       >
         {t('state.serverError.retry')}
       </button>
