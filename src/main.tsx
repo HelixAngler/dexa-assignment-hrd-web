@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { I18nProvider } from './i18n/provider';
 import { SessionProvider } from './services/session';
+import './styles/tokens.css';
 import './index.css';
 
 const container = document.getElementById('root');
