@@ -13,6 +13,51 @@ import { fetchAttendance, type AttendanceRowData } from '../services/attendance'
 /** Where the list is in its load; a failed refresh keeps no stale rows. */
 type ListStatus = 'loading' | 'ready' | 'error';
 
+/**
+ * How many employee rows the day view presents at once. A day up to this
+ * size lists every row exactly as it did before paging existed; a longer
+ * day is split so the page never has to mount hundreds of rows at once.
+ */
+const PAGE_SIZE = 50;
+
+/** One slot of the pager row: a page number, or the break before a jump. */
+type PageSlot = number | 'gap';
+
+/**
+ * The page numbers the pager offers: the first page, the last page and the
+ * neighbourhood of the current one, with a visual break wherever the run of
+ * numbers skips. The numbers themselves are the whole control surface, so
+ * the pager needs no wording in any language.
+ */
+function pageWindow(current: number, total: number): PageSlot[] {
+  const candidates = [1, current - 1, current, current + 1, total].filter(
+    (page) => page >= 1 && page <= total,
+  );
+  const pages = [...new Set(candidates)].sort((a, b) => a - b);
+  const slots: PageSlot[] = [];
+  let previous = 0;
+  for (const page of pages) {
+    if (previous !== 0 && page - previous > 1) {
+      slots.push('gap');
+    }
+    slots.push(page);
+    previous = page;
+  }
+  return slots;
+}
+
+/** The shape every numbered page slot shares: a 44 px target with tabular
+ *  figures, so digits line up whether they are rendered as buttons or, for
+ *  the page being read, as a marked position rather than a control. */
+const pageSlotShapeClassName =
+  'inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-[var(--radius-sm)] border px-[var(--space-sm)] tabular-nums [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]';
+
+/** A page you can move to. */
+const pageSlotClassName = `${pageSlotShapeClassName} border-[color:var(--color-border)] bg-[var(--color-surface)] font-medium text-[color:var(--color-text-strong)] hover:bg-[var(--color-page)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--color-primary)]`;
+
+/** The page being read: marked position, not another button. */
+const currentPageSlotClassName = `${pageSlotShapeClassName} border-[color:var(--color-primary)] bg-[var(--color-primary-subtle)] font-semibold text-[color:var(--color-primary)]`;
+
 /** The primary action styling shared by this screen's search buttons. */
 const primaryButtonClassName =
   'inline-flex min-h-[44px] items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-[var(--space-lg)] font-semibold text-[color:var(--color-on-primary)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)] hover:bg-[var(--color-primary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--color-primary)]';
@@ -40,7 +85,10 @@ function todayISO(): string {
  * get one stacked card per employee, and a date the server rejects is
  * explained next to the field instead of being called a server fault. When
  * the day and query yield nobody, the empty state offers the one thing left
- * to do: run the search again with whatever the fields now hold.
+ * to do: run the search again with whatever the fields now hold. A day that
+ * holds more rows than one page shows is presented a page at a time, and the
+ * pager only exists once there is a second page to go to, so ordinary days
+ * look and read exactly as they always did.
  */
 export default function AbsensiPage() {
   const { t } = useI18n();
@@ -50,6 +98,7 @@ export default function AbsensiPage() {
   const [rows, setRows] = useState<AttendanceRowData[]>([]);
   const [status, setStatus] = useState<ListStatus>('loading');
   const [dateInvalid, setDateInvalid] = useState(false);
+  const [page, setPage] = useState(1);
   const requestSeq = useRef(0);
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -57,6 +106,7 @@ export default function AbsensiPage() {
     const request = ++requestSeq.current;
     setStatus('loading');
     setDateInvalid(false);
+    setPage(1);
     try {
       const next = await fetchAttendance({ date, q: query });
       // Only the newest request may write; an older answer arrives too late.
@@ -96,6 +146,19 @@ export default function AbsensiPage() {
     setQuery(searchInput.trim());
     searchRef.current?.focus();
   };
+
+  // Paging arithmetic: a clamped current page keeps a stale page number (from
+  // a day that has since become shorter) from slicing into empty space.
+  const pageCount = Math.ceil(rows.length / PAGE_SIZE);
+  const currentPage = Math.min(page, Math.max(pageCount, 1));
+  const pageRows = rows.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+  const paginated = pageCount > 1;
+  const rangeFrom = (currentPage - 1) * PAGE_SIZE + 1;
+  const rangeTo = (currentPage - 1) * PAGE_SIZE + pageRows.length;
+  const pageSlots = paginated ? pageWindow(currentPage, pageCount) : [];
 
   return (
     <section data-testid="absensi" className="space-y-[var(--space-xl)]">
@@ -239,7 +302,7 @@ export default function AbsensiPage() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((row) => (
+                {pageRows.map((row) => (
                   <AttendanceRow key={row.employeeId} row={row} layout="table" />
                 ))}
               </tbody>
@@ -251,10 +314,66 @@ export default function AbsensiPage() {
             data-testid="absensi-cards"
             className="space-y-[var(--space-md)] md:hidden"
           >
-            {rows.map((row) => (
+            {pageRows.map((row) => (
               <AttendanceRow key={row.employeeId} row={row} layout="card" />
             ))}
           </ul>
+
+          {/* The pager sits beside the lists rather than inside either one,
+              so the rows themselves stay a plain, control-free surface. */}
+          {paginated && (
+            <div
+              data-testid="absensi-pagination"
+              className="flex flex-wrap items-center justify-between gap-[var(--space-md)]"
+            >
+              <p className="tabular-nums text-[color:var(--color-text-muted)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
+                {rangeFrom}–{rangeTo} / {rows.length}
+              </p>
+              <div
+                data-testid="absensi-page-buttons"
+                className="flex flex-wrap items-center gap-[var(--space-xs)]"
+              >
+                {pageSlots.map((slot, index) => {
+                  if (slot === 'gap') {
+                    return (
+                      <span
+                        key={`page-gap-${index}`}
+                        aria-hidden="true"
+                        className="px-[var(--space-xs)] text-[color:var(--color-text-muted)] [font-size:var(--text-sm)]"
+                      >
+                        …
+                      </span>
+                    );
+                  }
+                  if (slot === currentPage) {
+                    return (
+                      <span
+                        key={slot}
+                        data-testid="absensi-page"
+                        data-page={slot}
+                        aria-current="page"
+                        className={currentPageSlotClassName}
+                      >
+                        {slot}
+                      </span>
+                    );
+                  }
+                  return (
+                    <button
+                      key={slot}
+                      type="button"
+                      data-testid="absensi-page"
+                      data-page={slot}
+                      onClick={() => setPage(slot)}
+                      className={pageSlotClassName}
+                    >
+                      {slot}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </section>

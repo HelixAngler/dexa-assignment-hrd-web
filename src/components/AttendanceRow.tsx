@@ -110,6 +110,12 @@ function StatusLabel({ row }: CellProps) {
   );
 }
 
+/** How far the wide-screen name column may stretch before it is cut. The
+ *  clamp is what keeps the column's demand on the auto table bounded, so a
+ *  very long name ellipsizes inside its cell instead of pushing the table
+ *  past the card's edge. */
+const NAME_MAX_WIDTH = 'max-w-[40ch]';
+
 /** Wide-screen half: one table row of name, masuk, pulang and status. */
 function AttendanceTableRow({ row }: CellProps) {
   const cellClass =
@@ -122,10 +128,13 @@ function AttendanceTableRow({ row }: CellProps) {
       data-employee-id={row.employeeId}
       className="even:bg-[var(--color-page)]"
     >
-      <td
-        className={`${cellClass} break-words font-semibold text-[color:var(--color-text-strong)]`}
-      >
-        {row.name}
+      <td className={cellClass}>
+        <span
+          title={row.name}
+          className={`${NAME_MAX_WIDTH} block truncate break-words font-semibold text-[color:var(--color-text-strong)]`}
+        >
+          {row.name}
+        </span>
       </td>
       <td
         data-testid="attendance-masuk"
@@ -157,7 +166,10 @@ function AttendanceCard({ row }: CellProps) {
       data-employee-id={row.employeeId}
       className="flex flex-col gap-[var(--space-xs)] rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-[var(--color-surface)] p-[var(--space-lg)] shadow-[var(--shadow-card)]"
     >
-      <p className="break-words font-semibold text-[color:var(--color-text-strong)] [font-size:var(--text-body)] [line-height:var(--text-body-line-height)]">
+      <p
+        title={row.name}
+        className="break-words font-semibold text-[color:var(--color-text-strong)] [font-size:var(--text-body)] [line-height:var(--text-body-line-height)]"
+      >
         {row.name}
       </p>
       <dl className="flex flex-col gap-[var(--space-xs)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
@@ -194,7 +206,10 @@ function AttendanceCard({ row }: CellProps) {
  * One employee's attendance row in either half of the paired layout. Every
  * state is spelled out — a completed punch shows both times, an open session
  * says it is still running, a no-punch row prints a dash in both time cells
- * and names that state — and the row carries no control of any kind.
+ * and names that state — and the row carries no control of any kind. The
+ * name itself is clamped to one line with an ellipsis in the table half and
+ * free to wrap in the card half, and both halves keep the full name on the
+ * element as its tooltip, so nothing readable is ever simply lost.
  */
 export default function AttendanceRow({ row, layout }: AttendanceRowProps) {
   if (layout === 'table') {

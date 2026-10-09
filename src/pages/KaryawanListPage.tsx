@@ -180,7 +180,10 @@ export default function KaryawanListPage() {
                     className="border-b border-[color:var(--color-border)] even:bg-[var(--color-page)]"
                   >
                     <td className="h-[48px] px-[var(--space-md)] text-[color:var(--color-text)] align-middle">
-                      <span className="flex items-center gap-[var(--space-md)] font-semibold break-words text-[color:var(--color-text-strong)]">
+                      <span
+                        title={row.name}
+                        className="flex items-center gap-[var(--space-md)] font-semibold break-words text-[color:var(--color-text-strong)]"
+                      >
                         <span
                           aria-hidden="true"
                           className="flex h-10 w-10 flex-none items-center justify-center rounded-[var(--radius-full)] bg-[var(--color-primary-subtle)] font-bold text-[color:var(--color-primary)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]"
@@ -233,7 +236,10 @@ export default function KaryawanListPage() {
                     {initialsOf(row.name)}
                   </span>
                   <div className="min-w-0">
-                    <p className="break-words font-semibold text-[color:var(--color-text-strong)] [font-size:var(--text-body)] [line-height:var(--text-body-line-height)]">
+                    <p
+                      title={row.name}
+                      className="break-words font-semibold text-[color:var(--color-text-strong)] [font-size:var(--text-body)] [line-height:var(--text-body-line-height)]"
+                    >
                       {row.name}
                     </p>
                     <p className="break-words text-[color:var(--color-text-muted)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">

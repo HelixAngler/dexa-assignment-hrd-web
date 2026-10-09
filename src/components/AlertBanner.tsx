@@ -63,7 +63,10 @@ const MAX_VISIBLE_BANNERS = 3;
  * normal document flow (never a modal), the queue lives only in memory and
  * an event id is shown at most once. The visible stack reads newest first
  * (flex `order` reverses the append order) and caps at three banners with a
- * "+N more" line naming the hidden remainder.
+ * "+N more" line naming the hidden remainder. On a phone each banner spans
+ * the stack's full width and takes exactly the height of its own content,
+ * so banners can only ever meet where the stack's own gap puts them; only
+ * from the md breakpoint up do they share a row.
  */
 export default function AlertBanner({ createTransport }: AlertBannerProps) {
   const { t, lang } = useI18n();
@@ -117,10 +120,13 @@ export default function AlertBanner({ createTransport }: AlertBannerProps) {
               order: queue.length - index,
               ...(collapsed ? { display: 'none' } : null),
             }}
-            className="flex min-w-0 flex-1 items-start gap-[var(--space-md)] rounded-[var(--radius-lg)] border border-[color:var(--color-border)] border-l-[length:var(--space-xs)] border-l-[color:var(--color-primary)] bg-[var(--color-surface)] px-[var(--space-lg)] py-[var(--space-md)] shadow-[var(--shadow-raised)] md:min-w-[280px]"
+            className="flex w-full min-w-0 items-start gap-[var(--space-md)] rounded-[var(--radius-lg)] border border-[color:var(--color-border)] border-l-[length:var(--space-xs)] border-l-[color:var(--color-primary)] bg-[var(--color-surface)] px-[var(--space-lg)] py-[var(--space-md)] shadow-[var(--shadow-raised)] md:flex-1 md:min-w-[280px]"
           >
             <div className="flex min-w-0 flex-1 flex-col gap-[var(--space-xs)]">
-              <p className="break-words font-semibold text-[color:var(--color-text-strong)] [font-size:var(--text-body)] [line-height:var(--text-body-line-height)]">
+              <p
+                title={alert.employeeName}
+                className="break-words font-semibold text-[color:var(--color-text-strong)] [font-size:var(--text-body)] [line-height:var(--text-body-line-height)]"
+              >
                 {alert.employeeName}
               </p>
               <p className="break-words text-[color:var(--color-text)] [font-size:var(--text-body)] [line-height:var(--text-body-line-height)]">
