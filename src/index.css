@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+/* Pressed feedback for every control the reader can push. Scale only:
+   colour feedback already lives on each control's hover styles, and the
+   whole effect is held back when the reader has asked for less motion. */
+@media (prefers-reduced-motion: no-preference) {
+  button:not(:disabled):active,
+  a[href]:active,
+  [role="button"]:active {
+    transform: scale(0.98);
+    transition: transform var(--motion-fast) var(--motion-easing);
+  }
+}

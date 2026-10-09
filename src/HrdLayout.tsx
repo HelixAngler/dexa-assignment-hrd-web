@@ -31,7 +31,7 @@ export default function HrdLayout() {
   const { logout } = useSession();
 
   return (
-    <div className="min-h-screen bg-[var(--color-page)] text-[color:var(--color-text)]">
+    <div className="min-h-[100dvh] bg-[var(--color-page)] text-[color:var(--color-text)]">
       <header className="border-b border-[color:var(--color-border)] bg-[var(--color-surface)]">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-[var(--space-md)] px-[var(--space-lg)] py-[var(--space-sm)]">
           <span className="flex min-h-[44px] min-w-0 items-center break-words font-bold text-[color:var(--color-text-strong)] [font-size:var(--text-lg)] [line-height:var(--text-lg-line-height)]">

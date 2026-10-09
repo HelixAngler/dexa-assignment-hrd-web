@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AlertIcon } from '../components/icons';
 import { ServerErrorState } from '../components/states';
 import type { DictKey } from '../i18n/id';
 import { LanguageToggle, useI18n } from '../i18n/provider';
@@ -77,88 +78,109 @@ export default function FirstLoginPage() {
     void submit();
   }
 
+  /** Field box shared by both password inputs: 44 px floor, token colours. */
   const fieldClass =
-    'mt-1 h-11 w-full rounded-md border border-gray-300 px-3 text-sm text-gray-900 focus:border-[color:var(--color-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--color-primary)]';
+    'mt-1 min-h-[44px] w-full rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-base leading-6 text-[var(--color-text-strong)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] disabled:cursor-not-allowed disabled:bg-[var(--color-page)] disabled:text-[var(--color-text-muted)]';
 
   return (
     <section
       data-testid="first-login"
-      className="relative flex min-h-screen items-center justify-center bg-gray-50 px-4"
+      className="flex min-h-[100dvh] flex-col bg-[var(--color-page)] text-base leading-6 text-[var(--color-text)]"
     >
-      <div className="absolute right-4 top-4">
+      <div className="flex items-center justify-end px-4 py-3 md:px-6">
         <LanguageToggle />
       </div>
-      <div className="w-full max-w-sm rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <h1 className="text-2xl font-semibold text-gray-900">
-          {t('firstLogin.title')}
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">{t('firstLogin.subtitle')}</p>
+      <div className="flex flex-1 items-center justify-center px-4 py-6">
+        <div className="w-full max-w-[40ch] rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface)] p-6 shadow-[var(--shadow-card)]">
+          <p className="text-sm font-semibold leading-5 text-[var(--color-primary)]">
+            {t('shell.appName')}
+          </p>
+          <h1 className="mt-1 text-xl font-bold leading-8 text-[var(--color-text-strong)]">
+            {t('firstLogin.title')}
+          </h1>
+          <p className="mt-1 text-sm leading-5 text-[var(--color-text-muted)]">
+            {t('firstLogin.subtitle')}
+          </p>
 
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-          <div>
-            <label
-              htmlFor="first-login-new-password"
-              className="block text-sm font-medium text-gray-700"
-            >
-              {t('firstLogin.newPasswordLabel')}
-            </label>
-            <input
-              id="first-login-new-password"
-              name="newPassword"
-              type="password"
-              autoComplete="new-password"
-              required
-              value={newPassword}
-              onChange={(event) => setNewPassword(event.target.value)}
-              aria-describedby="first-login-hint"
-              className={fieldClass}
-            />
-            <p id="first-login-hint" className="mt-1 text-sm text-gray-500">
-              {t('firstLogin.hint')}
-            </p>
-          </div>
-          <div>
-            <label
-              htmlFor="first-login-confirm-password"
-              className="block text-sm font-medium text-gray-700"
-            >
-              {t('firstLogin.confirmPasswordLabel')}
-            </label>
-            <input
-              id="first-login-confirm-password"
-              name="confirmPassword"
-              type="password"
-              autoComplete="new-password"
-              required
-              value={confirmPassword}
-              onChange={(event) => setConfirmPassword(event.target.value)}
-              className={fieldClass}
-            />
-          </div>
-
-          {error !== null &&
-            (error.fault ? (
-              <ServerErrorState title={error.text} onRetry={() => void submit()} />
-            ) : (
-              <div
-                role="alert"
-                data-testid="first-login-error"
-                className="rounded-md border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-700"
+          <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="first-login-new-password"
+                className="text-sm font-medium leading-5 text-[var(--color-text)]"
               >
-                <p>{error.text}</p>
-              </div>
-            ))}
+                {t('firstLogin.newPasswordLabel')}
+              </label>
+              <input
+                id="first-login-new-password"
+                name="newPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                aria-describedby="first-login-hint"
+                className={fieldClass}
+              />
+              <p
+                id="first-login-hint"
+                className="text-sm leading-5 text-[var(--color-text-muted)]"
+              >
+                {t('firstLogin.hint')}
+              </p>
+            </div>
+            <div className="flex flex-col gap-1">
+              <label
+                htmlFor="first-login-confirm-password"
+                className="text-sm font-medium leading-5 text-[var(--color-text)]"
+              >
+                {t('firstLogin.confirmPasswordLabel')}
+              </label>
+              <input
+                id="first-login-confirm-password"
+                name="confirmPassword"
+                type="password"
+                autoComplete="new-password"
+                required
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                className={fieldClass}
+              />
+            </div>
 
-          <button
-            type="submit"
-            data-testid="first-login-submit"
-            disabled={submitting}
-            aria-busy={submitting}
-            className="min-h-[44px] w-full rounded-md bg-blue-600 px-4 text-sm font-semibold text-white hover:bg-blue-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--color-primary)] disabled:opacity-60"
-          >
-            {t('firstLogin.submit')}
-          </button>
-        </form>
+            {error !== null &&
+              (error.fault ? (
+                <ServerErrorState
+                  title={error.text}
+                  onRetry={() => void submit()}
+                  actionVariant="secondary"
+                />
+              ) : (
+                <div
+                  role="alert"
+                  data-testid="first-login-error"
+                  className="flex items-start gap-2 rounded-[var(--radius-sm)] bg-[var(--color-danger-bg)] px-3 py-2 text-sm leading-5"
+                >
+                  <AlertIcon
+                    size={20}
+                    className="mt-0.5 flex-none text-[var(--color-danger)]"
+                  />
+                  <p className="min-w-0 font-medium text-[var(--color-text-strong)]">
+                    {error.text}
+                  </p>
+                </div>
+              ))}
+
+            <button
+              type="submit"
+              data-testid="first-login-submit"
+              disabled={submitting}
+              aria-busy={submitting}
+              className="min-h-[44px] w-full rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-sm font-semibold leading-5 text-[var(--color-on-primary)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] hover:bg-[var(--color-primary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {t('firstLogin.submit')}
+            </button>
+          </form>
+        </div>
       </div>
     </section>
   );

@@ -1,6 +1,14 @@
 import { AlertIcon } from '../icons';
 import { useI18n } from '../../i18n/provider';
 
+/** Filled action styling, for a block that replaces the screen's content. */
+const primaryActionClassName =
+  'min-h-[44px] rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-sm font-semibold leading-5 text-[var(--color-on-primary)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] hover:bg-[var(--color-primary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]';
+
+/** Outlined action styling, for a screen that still shows its own primary. */
+const secondaryActionClassName =
+  'min-h-[44px] rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 text-sm font-semibold leading-5 text-[var(--color-text)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] hover:bg-[var(--color-page)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]';
+
 export interface ServerErrorStateProps {
   /** Called when the user asks to retry the failed load. */
   onRetry?: () => void;
@@ -8,6 +16,13 @@ export interface ServerErrorStateProps {
   title?: string;
   /** Overrides the body copy; defaults to the active-language copy. */
   description?: string;
+  /**
+   * Weight of the retry action. A screen that still shows its own filled
+   * primary action passes 'secondary', so the block never puts a second
+   * filled button beside it; a block that replaces the screen's content
+   * keeps the default and stays the only action on view.
+   */
+  actionVariant?: 'primary' | 'secondary';
 }
 
 /**
@@ -20,8 +35,14 @@ export default function ServerErrorState({
   onRetry,
   title,
   description,
+  actionVariant = 'primary',
 }: ServerErrorStateProps) {
   const { t } = useI18n();
+
+  const retryClassName =
+    actionVariant === 'secondary'
+      ? secondaryActionClassName
+      : primaryActionClassName;
 
   return (
     <section
@@ -40,7 +61,7 @@ export default function ServerErrorState({
         type="button"
         data-testid="retry-button"
         onClick={() => onRetry?.()}
-        className="min-h-[44px] rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 text-sm font-semibold leading-5 text-[var(--color-on-primary)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] hover:bg-[var(--color-primary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-primary)]"
+        className={retryClassName}
       >
         {t('state.serverError.retry')}
       </button>

@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -22,7 +23,10 @@ export interface SuccessToastProps {
 /**
  * Success confirmation toast, fixed near the top of the viewport so callers
  * do not need a placement container. It auto-dismisses, is announced through
- * `role="status"`, and can be dismissed manually.
+ * `role="status"`, and can be dismissed manually. The countdown holds while
+ * the pointer rests on the toast or focus sits inside it, so a reader who is
+ * about to act on the confirmation does not lose it mid-reach, and it keeps
+ * the time already waited when the pointer or focus moves away again.
  */
 export default function SuccessToast({
   message,
@@ -31,25 +35,60 @@ export default function SuccessToast({
 }: SuccessToastProps) {
   const { t } = useI18n();
   const [visible, setVisible] = useState(true);
+  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
+  const deadlineRef = useRef(0);
+  const remainingRef = useRef(durationMs);
+  const armedRef = useRef({ message, durationMs });
 
   useEffect(() => {
     setVisible(true);
   }, [message]);
 
+  // A replaced message (or a new delay) starts a fresh countdown instead of
+  // inheriting whatever the previous one had left.
   useEffect(() => {
-    if (!visible) {
+    if (
+      armedRef.current.message !== message ||
+      armedRef.current.durationMs !== durationMs
+    ) {
+      armedRef.current = { message, durationMs };
+      remainingRef.current = durationMs;
+    }
+  }, [message, durationMs]);
+
+  useEffect(() => {
+    if (!visible || paused) {
       return;
     }
+    deadlineRef.current = Date.now() + remainingRef.current;
     const timer = setTimeout(() => {
       setVisible(false);
       onDismiss?.();
-    }, durationMs);
+    }, remainingRef.current);
     return () => clearTimeout(timer);
-  }, [visible, message, durationMs, onDismiss]);
+  }, [visible, paused, message, durationMs, onDismiss]);
 
   if (!visible) {
     return null;
   }
+
+  const pauseCountdown = () => {
+    if (pausedRef.current) {
+      return;
+    }
+    pausedRef.current = true;
+    remainingRef.current = Math.max(0, deadlineRef.current - Date.now());
+    setPaused(true);
+  };
+
+  const resumeCountdown = () => {
+    if (!pausedRef.current) {
+      return;
+    }
+    pausedRef.current = false;
+    setPaused(false);
+  };
 
   const dismiss = () => {
     setVisible(false);
@@ -61,6 +100,10 @@ export default function SuccessToast({
       data-testid="success-toast"
       role="status"
       aria-live="polite"
+      onMouseEnter={pauseCountdown}
+      onMouseLeave={resumeCountdown}
+      onFocusCapture={pauseCountdown}
+      onBlurCapture={resumeCountdown}
       className="fixed left-1/2 top-4 z-50 flex w-[min(92vw,420px)] -translate-x-1/2 items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-success)] bg-[var(--color-success-bg)] px-4 py-3 shadow-[var(--shadow-raised)]"
     >
       <span

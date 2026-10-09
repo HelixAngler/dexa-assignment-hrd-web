@@ -114,7 +114,10 @@ export default function KaryawanListPage() {
       {status === 'loading' && <LoadingState />}
 
       {status === 'error' && (
-        <ServerErrorState onRetry={() => void load()} />
+        <ServerErrorState
+          onRetry={() => void load()}
+          actionVariant="secondary"
+        />
       )}
 
       {emptyOnScreen && (

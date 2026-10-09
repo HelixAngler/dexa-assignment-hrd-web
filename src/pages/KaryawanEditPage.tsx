@@ -232,7 +232,11 @@ export default function KaryawanEditPage() {
       </h1>
 
       {failedAction !== null && (
-        <ServerErrorState title={t('form.error.save')} onRetry={retryFailedAction} />
+        <ServerErrorState
+          title={t('form.error.save')}
+          onRetry={retryFailedAction}
+          actionVariant="secondary"
+        />
       )}
 
       {loadState === 'loading' && <LoadingState />}

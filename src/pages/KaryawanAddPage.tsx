@@ -227,6 +227,7 @@ export default function KaryawanAddPage() {
                 void handleSubmit(lastValues);
               }
             }}
+            actionVariant="secondary"
           />
         </div>
       )}

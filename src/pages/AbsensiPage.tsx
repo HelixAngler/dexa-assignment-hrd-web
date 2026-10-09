@@ -62,6 +62,14 @@ const currentPageSlotClassName = `${pageSlotShapeClassName} border-[color:var(--
 const primaryButtonClassName =
   'inline-flex min-h-[44px] items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)] px-[var(--space-lg)] font-semibold text-[color:var(--color-on-primary)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)] hover:bg-[var(--color-primary-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--color-primary)]';
 
+/**
+ * The same control stepping back to an outlined surface, used when the empty
+ * block already owns the screen's next step: two identically labelled filled
+ * buttons in one view would leave the reader guessing which one moves.
+ */
+const secondaryButtonClassName =
+  'inline-flex min-h-[44px] items-center justify-center rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-[var(--color-surface)] px-[var(--space-lg)] font-semibold text-[color:var(--color-text)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)] hover:bg-[var(--color-page)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--color-primary)]';
+
 /** One control column of the filter row: label stacked over its input. */
 const fieldClass =
   'min-h-[44px] w-full rounded-[var(--radius-sm)] border border-[color:var(--color-border)] bg-[var(--color-surface)] px-[var(--space-md)] text-[color:var(--color-text-strong)] [font-size:var(--text-body)] [line-height:var(--text-body-line-height)] focus:border-[color:var(--color-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--color-primary)]';
@@ -160,6 +168,10 @@ export default function AbsensiPage() {
   const rangeTo = (currentPage - 1) * PAGE_SIZE + pageRows.length;
   const pageSlots = paginated ? pageWindow(currentPage, pageCount) : [];
 
+  // One predicate drives both the empty block and the filter button's weight,
+  // so the two can never drift apart in one state of the page.
+  const emptyOnScreen = status === 'ready' && rows.length === 0 && !dateInvalid;
+
   return (
     <section data-testid="absensi" className="space-y-[var(--space-xl)]">
       <h1 className="font-bold text-[color:var(--color-text-strong)] [font-size:var(--text-xl)] [line-height:var(--text-xl-line-height)]">
@@ -225,9 +237,10 @@ export default function AbsensiPage() {
         <button
           type="submit"
           data-testid="absensi-search-submit"
-          className={[primaryButtonClassName, 'w-full shrink-0 md:w-auto'].join(
-            ' ',
-          )}
+          className={[
+            emptyOnScreen ? secondaryButtonClassName : primaryButtonClassName,
+            'w-full shrink-0 md:w-auto',
+          ].join(' ')}
         >
           {t('absensi.searchSubmit')}
         </button>
@@ -246,9 +259,14 @@ export default function AbsensiPage() {
 
       {status === 'loading' && <LoadingState />}
 
-      {status === 'error' && <ServerErrorState onRetry={() => void load()} />}
+      {status === 'error' && (
+        <ServerErrorState
+          onRetry={() => void load()}
+          actionVariant="secondary"
+        />
+      )}
 
-      {status === 'ready' && rows.length === 0 && !dateInvalid && (
+      {emptyOnScreen && (
         <EmptyState
           title={t('absensi.emptyTitle')}
           description={t('absensi.emptyDescription')}
