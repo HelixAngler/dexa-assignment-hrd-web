@@ -22,6 +22,7 @@ const row = {
   email: 'budi@corp.test',
   position: 'Engineer',
   status: 'active',
+  role: 'employee',
 };
 
 describe('employees service', () => {

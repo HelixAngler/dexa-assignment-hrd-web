@@ -11,8 +11,55 @@ export const id = {
   'shell.openMenu': 'Buka menu navigasi',
   'shell.closeMenu': 'Tutup menu navigasi',
   'shell.toggleLanguage': 'Ganti bahasa',
+  'shell.changePassword': 'Ganti kata sandi',
   'nav.karyawan': 'Karyawan',
   'nav.absensi': 'Absensi',
+  'nav.hr': 'Akun HR',
+  'nav.hrApprovals': 'Persetujuan HR',
+
+  // Direktori akun HR (/hrd/hr)
+  'hr.accounts.title': 'Akun HR',
+  'hr.accounts.subtitle': 'Semua akun dengan peran HR di konsol ini.',
+  'hr.accounts.openApprovals': 'Persetujuan HR',
+  'hr.accounts.emptyTitle': 'Belum ada akun HR',
+  'hr.accounts.emptyDescription':
+    'Setiap akun HR yang dibuat melalui persetujuan akan muncul di sini.',
+
+  // Tambah akun HR (/hrd/hr/add)
+  'hr.add.title': 'Tambah Akun HR',
+  'hr.add.submit': 'Kirim usulan',
+  'hr.add.pendingTitle': 'Usulan terkirim',
+  'hr.add.pendingDescription':
+    'Usulan akun HR menunggu persetujuan HR lain. Kata sandi sementara diterbitkan dan hanya ditampilkan kepada penyetuju setelah usulan disetujui.',
+  'hr.add.pendingOpenApprovals': 'Buka Persetujuan HR',
+
+  // Ubah akun HR (/hrd/hr/:id/edit)
+  'hr.edit.title': 'Ubah Akun HR',
+  'hr.edit.pendingTitle': 'Menunggu persetujuan',
+  'hr.edit.pendingDescription':
+    'Usulan berikut menunggu keputusan HR lain. Semua tindakan dinonaktifkan sampai keputusan itu diambil.',
+  'hr.edit.pendingListLabel': 'Usulan tertunda',
+  'hr.edit.noChanges': 'Tidak ada perubahan untuk dikirim.',
+  'hr.edit.statusConfirmTitle': 'Nonaktifkan akun HR ini?',
+  'hr.edit.statusConfirmBody':
+    'Akun hanya dinonaktifkan setelah usulan disetujui HR lain; sampai saat itu status dan akses tidak berubah.',
+  'hr.edit.reactivateAction': 'Usulkan aktifkan kembali',
+  'hr.edit.reactivateConfirmTitle': 'Aktifkan kembali akun HR ini?',
+  'hr.edit.reactivateConfirmBody':
+    'Akun diaktifkan kembali setelah usulan disetujui HR lain; sampai saat itu status dan akses tidak berubah.',
+  'hr.edit.reactivateConfirm': 'Ya, usulkan',
+  'hr.edit.resetHint':
+    'Reset kata sandi diusulkan lewat persetujuan. Kata sandi baru diterbitkan dan hanya ditampilkan kepada penyetuju setelah usulan disetujui.',
+  'hr.edit.resetAction': 'Usulkan reset kata sandi',
+  'hr.edit.resetConfirmTitle': 'Usulkan reset kata sandi?',
+  'hr.edit.resetConfirmBody':
+    'Usulan ini dikirim ke Persetujuan HR dan belum mengubah kata sandi apa pun.',
+  'hr.edit.resetConfirm': 'Ya, usulkan',
+  'hr.edit.notFoundTitle': 'Akun HR tidak ditemukan',
+  'hr.edit.notFoundDescription':
+    'Akun ini mungkin sudah dihapus. Kembali ke daftar untuk data terbaru.',
+  'hr.edit.notFoundBack': 'Kembali ke daftar akun HR',
+  'toast.hr.proposed': 'Usulan dikirim dan menunggu persetujuan.',
 
   // Feedback states
   'state.loading.title': 'Memuat data…',
@@ -94,6 +141,10 @@ export const id = {
 
   // Ubah karyawan
   'karyawan.edit.title': 'Ubah Karyawan',
+  'karyawan.edit.hrManagedTitle': 'Akun HR dikelola lewat persetujuan',
+  'karyawan.edit.hrManagedDescription':
+    'Akun HR diubah lewat halaman Akun HR: setiap perubahan menjadi usulan yang menunggu persetujuan HR lain.',
+  'karyawan.edit.hrManagedAction': 'Buka halaman Akun HR',
   'karyawan.edit.notFoundTitle': 'Karyawan tidak ditemukan',
   'karyawan.edit.notFoundDescription':
     'Data ini mungkin sudah dihapus. Kembali ke daftar untuk data terbaru.',
@@ -132,6 +183,41 @@ export const id = {
   'toast.karyawan.statusChanged': 'Status karyawan berhasil diperbarui.',
   'toast.karyawan.passwordReset': 'Kata sandi berhasil diatur ulang.',
 
+  // Persetujuan maker-checker untuk akun HR
+  'karyawan.approval.title': 'Persetujuan HR',
+  'karyawan.approval.subtitle':
+    'Putuskan usulan perubahan akun HR yang dikirim akun HR lain.',
+  'karyawan.approval.state.pending': 'Menunggu',
+  'karyawan.approval.state.approved': 'Disetujui',
+  'karyawan.approval.state.rejected': 'Ditolak',
+  'karyawan.approval.state.withdrawn': 'Dibatalkan',
+  'karyawan.approval.type.add_hr': 'Tambah HR',
+  'karyawan.approval.type.deactivate_hr': 'Nonaktifkan HR',
+  'karyawan.approval.type.reactivate_hr': 'Aktifkan kembali HR',
+  'karyawan.approval.type.reset_password': 'Reset kata sandi',
+  'karyawan.approval.type.update_hr': 'Ubah data akun HR',
+  'karyawan.approval.confirmApproveTitle': 'Setujui usulan ini?',
+  'karyawan.approval.confirmRejectTitle': 'Tolak usulan ini?',
+  'karyawan.approval.refused':
+    'Server menolak permintaan ini. Belum ada perubahan; periksa kembali lalu coba lagi.',
+  'karyawan.approval.maker': 'Pengusul',
+  'karyawan.approval.checker': 'Penyetuju',
+  'karyawan.approval.decidedAt': 'Waktu keputusan',
+  'karyawan.approval.note': 'Catatan',
+  'karyawan.approval.rejectNote': 'Alasan penolakan',
+  'karyawan.approval.approve': 'Setujui',
+  'karyawan.approval.reject': 'Tolak',
+  'karyawan.approval.withdraw': 'Batalkan usulan',
+  'karyawan.approval.selfHint':
+    'Anda pengusul usulan ini; akun HR lain yang harus memutuskan.',
+  'karyawan.approval.targetHint':
+    'Usulan ini menghapus akses Anda sendiri; HR lain yang harus memutuskannya.',
+  'karyawan.approval.tempPassword': 'Kata sandi sementara (satu kali)',
+  'karyawan.approval.tempPasswordNote':
+    'Salin sekarang. Kata sandi hanya ditampilkan sekali dan tidak dapat dilihat lagi.',
+  'karyawan.approval.empty': 'Belum ada usulan.',
+  'karyawan.approval.loadError': 'Daftar persetujuan gagal dimuat.',
+
   // Absensi: HRD read-only attendance view
   'absensi.title': 'Absensi',
   'absensi.readOnlyNote':
@@ -161,6 +247,27 @@ export const id = {
   'alert.field.phone': 'nomor telepon',
   'alert.field.photo': 'foto',
   'alert.field.password': 'kata sandi',
+
+  // Ubah kata sandi (akun HRD sendiri)
+  'password.title': 'Ubah Kata Sandi',
+  'password.currentLabel': 'Kata sandi saat ini',
+  'password.newLabel': 'Kata sandi baru',
+  'password.confirmLabel': 'Ulangi kata sandi baru',
+  'password.hint.min': 'Minimal 8 karakter.',
+  'password.hint.printable': 'Semua karakter yang dapat dicetak diperbolehkan.',
+  'password.hint.avoidCommon': 'Hindari kata sandi yang sering dipakai.',
+  'password.note':
+    'Sesi Anda di perangkat ini tetap aktif; perangkat lain akan keluar otomatis.',
+  'password.mismatch': 'Kata sandi baru tidak sama.',
+  'password.error.currentRequired': 'Masukkan kata sandi saat ini.',
+  'password.error.tooShort': 'Kata sandi baru minimal 8 karakter.',
+  'password.error.weak': 'Kata sandi tidak memenuhi persyaratan keamanan.',
+  'password.error.currentWrong': 'Kata sandi saat ini salah.',
+  'password.save': 'Simpan',
+  'password.cancel': 'Batal',
+  'password.success': 'Kata sandi berhasil diubah.',
+  'password.successNote': 'Sesi ini tetap aktif; perangkat lain harus masuk kembali.',
+  'password.done': 'Selesai',
 } as const;
 
 /** Every legal translation key, derived from the complete (Indonesian) dictionary. */

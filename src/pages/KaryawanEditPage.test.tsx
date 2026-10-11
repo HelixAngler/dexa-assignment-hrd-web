@@ -25,6 +25,7 @@ const storedRow: employeesService.EmployeeSummary = {
   email: 'budi@corp.test',
   position: 'Engineer',
   status: 'active',
+  role: 'employee',
 };
 
 function renderEdit() {
@@ -445,5 +446,48 @@ describe('KaryawanEditPage', () => {
         name: id['karyawan.status.deactivated'],
       }),
     ).toBeInTheDocument();
+  });
+
+  it('replaces the whole editor with an HR-managed notice for an HR account', async () => {
+    vi.mocked(employeesService.fetchEmployeeById).mockResolvedValue({
+      ...storedRow,
+      role: 'hrd',
+    });
+    renderEdit();
+
+    const notice = await screen.findByTestId('karyawan-edit-hr-managed');
+    expect(
+      within(notice).getByText(id['karyawan.edit.hrManagedTitle']),
+    ).toBeInTheDocument();
+    expect(
+      within(notice).getByText(id['karyawan.edit.hrManagedDescription']),
+    ).toBeInTheDocument();
+    expect(
+      within(notice).getByRole('link', { name: id['karyawan.edit.hrManagedAction'] }),
+    ).toHaveAttribute('href', '/hr/emp-1/edit');
+    expect(
+      within(notice).getByTestId('karyawan-edit-open-hr-page'),
+    ).toBeInTheDocument();
+
+    expect(screen.queryByTestId('employee-form')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('status-card')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('password-card')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('reset-password')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('radio', { name: id['karyawan.status.deactivated'] }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('keeps the full editor for a regular employee', async () => {
+    renderEdit();
+
+    await screen.findByDisplayValue('Budi Santoso');
+
+    expect(
+      screen.queryByTestId('karyawan-edit-hr-managed'),
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('employee-form')).toBeInTheDocument();
+    expect(screen.getByTestId('status-card')).toBeInTheDocument();
+    expect(screen.getByTestId('password-card')).toBeInTheDocument();
   });
 });

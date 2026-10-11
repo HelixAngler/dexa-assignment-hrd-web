@@ -191,3 +191,20 @@ export async function setFirstPassword(
     writeMeta({ ...meta, mustChangePassword: false });
   }
 }
+
+/**
+ * Changes the signed-in account's own password. The current password is
+ * mandatory; a weak replacement is rejected with `PASSWORD_WEAK` and a wrong
+ * current password with `AUTH_INVALID`, both carrying the human explanation.
+ * The session that performs the change survives, every other session of the
+ * same account is dropped server-side.
+ */
+export function changePassword(
+  currentPassword: string,
+  newPassword: string,
+): Promise<null> {
+  return apiFetch<null>(`${IDENTITY_BASE}/auth/password/change`, {
+    method: 'POST',
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+}

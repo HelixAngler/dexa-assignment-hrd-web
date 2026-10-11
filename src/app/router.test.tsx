@@ -31,6 +31,7 @@ vi.mock('../services/employees', () => ({
   IDENTITY_BASE: '/api/identity',
   listEmployees: vi.fn(),
   fetchEmployeeById: vi.fn(),
+  fetchEmployeeRecord: vi.fn(),
   createEmployee: vi.fn(),
   updateEmployee: vi.fn(),
   setEmployeeStatus: vi.fn(),
@@ -74,6 +75,8 @@ describe('route table', () => {
     vi.mocked(employeesService.listEmployees).mockResolvedValue([]);
     vi.mocked(employeesService.fetchEmployeeById).mockReset();
     vi.mocked(employeesService.fetchEmployeeById).mockResolvedValue(null);
+    vi.mocked(employeesService.fetchEmployeeRecord).mockReset();
+    vi.mocked(employeesService.fetchEmployeeRecord).mockResolvedValue(null);
     vi.mocked(authService.fetchSession).mockResolvedValue(hrdSession);
     vi.mocked(attendanceService.fetchAttendance).mockReset();
     vi.mocked(attendanceService.fetchAttendance).mockResolvedValue([]);
@@ -111,6 +114,21 @@ describe('route table', () => {
     expect(await screen.findByTestId('karyawan-edit')).toBeTruthy();
   });
 
+  it('renders the HR directory at /hr', async () => {
+    renderAt('/hr');
+    expect(await screen.findByTestId('hr-accounts')).toBeTruthy();
+  });
+
+  it('renders the HR proposal form at /hr/add', async () => {
+    renderAt('/hr/add');
+    expect(await screen.findByTestId('hr-add')).toBeTruthy();
+  });
+
+  it('renders the HR proposal screen at /hr/:id/edit', async () => {
+    renderAt('/hr/42/edit');
+    expect(await screen.findByTestId('hr-edit')).toBeTruthy();
+  });
+
   it('renders the attendance page at /absensi', async () => {
     renderAt('/absensi');
 
@@ -141,6 +159,8 @@ describe('session routing policy', () => {
     vi.mocked(employeesService.listEmployees).mockResolvedValue([]);
     vi.mocked(employeesService.fetchEmployeeById).mockReset();
     vi.mocked(employeesService.fetchEmployeeById).mockResolvedValue(null);
+    vi.mocked(employeesService.fetchEmployeeRecord).mockReset();
+    vi.mocked(employeesService.fetchEmployeeRecord).mockResolvedValue(null);
     vi.mocked(attendanceService.fetchAttendance).mockReset();
     vi.mocked(attendanceService.fetchAttendance).mockResolvedValue([]);
   });
@@ -248,6 +268,8 @@ describe('language toggle on every screen', () => {
     vi.mocked(employeesService.listEmployees).mockResolvedValue([]);
     vi.mocked(employeesService.fetchEmployeeById).mockReset();
     vi.mocked(employeesService.fetchEmployeeById).mockResolvedValue(null);
+    vi.mocked(employeesService.fetchEmployeeRecord).mockReset();
+    vi.mocked(employeesService.fetchEmployeeRecord).mockResolvedValue(null);
     vi.mocked(attendanceService.fetchAttendance).mockReset();
     vi.mocked(attendanceService.fetchAttendance).mockResolvedValue([]);
   });

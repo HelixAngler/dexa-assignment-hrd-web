@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   EmployeeForm,
   EmptyState,
@@ -70,8 +70,10 @@ function toUpdateInput(values: EmployeeFormValues): EmployeeUpdateInput {
  * Edit screen for one employee: the shared form for the profile columns, a
  * status control wired to its own endpoint (deactivation goes through a
  * confirmation because it signs the employee out) and a password reset that
- * reveals the new temporary password exactly once. Attendance data has no
- * place on this screen, so none of its fields exist here.
+ * reveals the new temporary password exactly once. An HR account is managed
+ * through the four-eyes approval flow instead, so it gets a pointer to that
+ * flow and none of the controls. Attendance data has no place on this screen,
+ * so none of its fields exist here.
  */
 export default function KaryawanEditPage() {
   const { id } = useParams<{ id: string }>();
@@ -262,7 +264,30 @@ export default function KaryawanEditPage() {
         />
       )}
 
-      {loadState === 'ready' && employee !== null && (
+      {/* HR accounts never take the direct controls: every change to them is
+          a proposal filed from the HR account screens, so this screen only
+          points at where those proposals are made. */}
+      {loadState === 'ready' && employee !== null && employee.role === 'hrd' && (
+        <div data-testid="karyawan-edit-hr-managed" className={cardClassName}>
+          <h2 className="font-semibold text-[color:var(--color-text-strong)] [font-size:var(--text-body)] [line-height:var(--text-body-line-height)]">
+            {t('karyawan.edit.hrManagedTitle')}
+          </h2>
+          <p className="text-[color:var(--color-text-muted)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)]">
+            {t('karyawan.edit.hrManagedDescription')}
+          </p>
+          <div className="flex flex-wrap gap-[var(--space-md)]">
+            <Link
+              to={`/hr/${employee.id}/edit`}
+              data-testid="karyawan-edit-open-hr-page"
+              className={secondaryButtonClassName}
+            >
+              {t('karyawan.edit.hrManagedAction')}
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {loadState === 'ready' && employee !== null && employee.role !== 'hrd' && (
         <>
           <div className={cardClassName}>
             <EmployeeForm

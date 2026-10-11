@@ -20,6 +20,7 @@ const rows: employeesService.EmployeeSummary[] = [
     email: 'budi@corp.test',
     position: 'Engineer',
     status: 'active',
+    role: 'employee',
   },
   {
     id: 'emp-2',
@@ -27,6 +28,7 @@ const rows: employeesService.EmployeeSummary[] = [
     email: 'citra@corp.test',
     position: 'Designer',
     status: 'deactivated',
+    role: 'employee',
   },
 ];
 
@@ -247,5 +249,55 @@ describe('KaryawanListPage', () => {
     );
 
     expect(await screen.findByTestId('edit-destination')).toBeInTheDocument();
+  });
+
+  it('no longer mounts the HR approval section on the list screen', async () => {
+    renderList();
+
+    await screen.findByTestId('karyawan-table');
+
+    expect(screen.queryByTestId('approval-section')).not.toBeInTheDocument();
+  });
+
+  it('hides the edit action on HR-role rows in both layouts', async () => {
+    vi.mocked(employeesService.listEmployees).mockResolvedValue([
+      rows[0],
+      {
+        id: 'emp-3',
+        name: 'Sari Wati',
+        email: 'sari@corp.test',
+        position: 'HR Officer',
+        status: 'active',
+        role: 'hrd',
+      },
+    ]);
+    renderList();
+
+    const table = await screen.findByTestId('karyawan-table');
+    const bodyRows = within(table).getAllByTestId('karyawan-row');
+    expect(bodyRows).toHaveLength(2);
+
+    expect(
+      within(bodyRows[0]).getByRole('link', { name: id['karyawan.list.edit'] }),
+    ).toHaveAttribute('href', '/karyawan/emp-1/edit');
+
+    // The actions cell stays so the columns keep aligning; only the link goes.
+    expect(bodyRows[1].children).toHaveLength(bodyRows[0].children.length);
+    expect(
+      within(bodyRows[1]).queryByRole('link', {
+        name: id['karyawan.list.edit'],
+      }),
+    ).not.toBeInTheDocument();
+
+    const cards = within(screen.getByTestId('karyawan-cards')).getAllByTestId(
+      'karyawan-card',
+    );
+    expect(
+      within(cards[0]).getByRole('link', { name: id['karyawan.list.edit'] }),
+    ).toBeInTheDocument();
+    expect(
+      within(cards[1]).queryByRole('link', { name: id['karyawan.list.edit'] }),
+    ).not.toBeInTheDocument();
+    expect(cards[1]).toHaveTextContent('Sari Wati');
   });
 });

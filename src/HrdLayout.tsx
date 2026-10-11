@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { AlertBanner } from './components';
 import { CloseIcon, HamburgerIcon } from './components/icons';
 import type { DictKey } from './i18n/id';
@@ -9,6 +9,8 @@ import { useSession } from './services/session';
 /** Navigation targets; labels are resolved through the i18n dictionary. */
 export const navItems: readonly { to: string; labelKey: DictKey }[] = [
   { to: '/karyawan', labelKey: 'nav.karyawan' },
+  { to: '/hr', labelKey: 'nav.hr' },
+  { to: '/approvals', labelKey: 'nav.hrApprovals' },
   { to: '/absensi', labelKey: 'nav.absensi' },
 ];
 
@@ -29,6 +31,7 @@ export default function HrdLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { t } = useI18n();
   const { logout } = useSession();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-[100dvh] bg-[var(--color-page)] text-[color:var(--color-text)]">
@@ -52,6 +55,14 @@ export default function HrdLayout() {
 
           <div className="flex items-center gap-[var(--space-sm)]">
             <LanguageToggle />
+            <button
+              type="button"
+              data-testid="shell-change-password"
+              onClick={() => navigate('/ganti-sandi')}
+              className="hidden min-h-[44px] items-center justify-center rounded-[var(--radius-md)] border border-transparent px-[var(--space-md)] font-semibold text-[color:var(--color-text)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)] hover:bg-[var(--color-page)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--color-primary)] md:inline-flex"
+            >
+              {t('shell.changePassword')}
+            </button>
             <button
               type="button"
               data-testid="shell-sign-out"
@@ -86,6 +97,17 @@ export default function HrdLayout() {
                 {t(item.labelKey)}
               </NavLink>
             ))}
+            <button
+              type="button"
+              data-testid="nav-change-password"
+              onClick={() => {
+                setMenuOpen(false);
+                navigate('/ganti-sandi');
+              }}
+              className="inline-flex min-h-[44px] items-center rounded-[var(--radius-sm)] px-[var(--space-md)] text-left font-medium text-[color:var(--color-text)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-easing)] [font-size:var(--text-sm)] [line-height:var(--text-sm-line-height)] hover:bg-[var(--color-page)] hover:text-[color:var(--color-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--color-primary)] md:hidden"
+            >
+              {t('shell.changePassword')}
+            </button>
           </nav>
         )}
       </header>

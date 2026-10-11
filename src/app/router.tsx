@@ -4,7 +4,12 @@ import HrdLayout from '../HrdLayout';
 import { AccessDeniedState, LoadingState } from '../components';
 import { LanguageToggle, useI18n } from '../i18n/provider';
 import AbsensiPage from '../pages/AbsensiPage';
+import ChangePasswordPage from '../pages/ChangePasswordPage';
 import FirstLoginPage from '../pages/FirstLoginPage';
+import HrAccountsPage from '../pages/HrAccountsPage';
+import HrAddPage from '../pages/HrAddPage';
+import HrApprovalsPage from '../pages/HrApprovalsPage';
+import HrEditPage from '../pages/HrEditPage';
 import KaryawanAddPage from '../pages/KaryawanAddPage';
 import KaryawanEditPage from '../pages/KaryawanEditPage';
 import KaryawanListPage from '../pages/KaryawanListPage';
@@ -22,7 +27,12 @@ export const protectedRoutes: RouteObject[] = [
   { path: '/karyawan', element: <KaryawanListPage /> },
   { path: '/karyawan/add', element: <KaryawanAddPage /> },
   { path: '/karyawan/:id/edit', element: <KaryawanEditPage /> },
+  { path: '/hr', element: <HrAccountsPage /> },
+  { path: '/hr/add', element: <HrAddPage /> },
+  { path: '/hr/:id/edit', element: <HrEditPage /> },
+  { path: '/approvals', element: <HrApprovalsPage /> },
   { path: '/absensi', element: <AbsensiPage /> },
+  { path: '/ganti-sandi', element: <ChangePasswordPage /> },
 ];
 
 /**

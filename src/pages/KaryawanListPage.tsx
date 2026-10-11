@@ -206,13 +206,18 @@ export default function KaryawanListPage() {
                       <StatusBadge status={row.status} />
                     </td>
                     <td className="h-[48px] px-[var(--space-md)] text-[color:var(--color-text)] align-middle">
-                      <Link
-                        to={`/karyawan/${row.id}/edit`}
-                        data-testid={`edit-${row.id}`}
-                        className={editActionClassName}
-                      >
-                        {t('karyawan.list.edit')}
-                      </Link>
+                      {/* HR accounts are managed through the approval flow, so
+                          the cell stays for column alignment but carries no
+                          direct edit. */}
+                      {row.role !== 'hrd' && (
+                        <Link
+                          to={`/karyawan/${row.id}/edit`}
+                          data-testid={`edit-${row.id}`}
+                          className={editActionClassName}
+                        >
+                          {t('karyawan.list.edit')}
+                        </Link>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -255,13 +260,15 @@ export default function KaryawanListPage() {
                 </p>
                 <div className="mt-[var(--space-md)] flex items-center justify-between gap-[var(--space-md)]">
                   <StatusBadge status={row.status} />
-                  <Link
-                    to={`/karyawan/${row.id}/edit`}
-                    data-testid={`edit-card-${row.id}`}
-                    className={editActionClassName}
-                  >
-                    {t('karyawan.list.edit')}
-                  </Link>
+                  {row.role !== 'hrd' && (
+                    <Link
+                      to={`/karyawan/${row.id}/edit`}
+                      data-testid={`edit-card-${row.id}`}
+                      className={editActionClassName}
+                    >
+                      {t('karyawan.list.edit')}
+                    </Link>
+                  )}
                 </div>
               </li>
             ))}

@@ -1,6 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from './api';
-import { fetchSession, login, logout, setFirstPassword } from './auth';
+import {
+  changePassword,
+  fetchSession,
+  login,
+  logout,
+  setFirstPassword,
+} from './auth';
 
 function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
@@ -281,6 +287,33 @@ describe('auth service', () => {
         status: 400,
         code: 'PASSWORD_WEAK',
       });
+    });
+  });
+
+  describe('changePassword', () => {
+    it('posts both password fields to the self-service change endpoint', async () => {
+      fetchMock.mockResolvedValue(new Response(null, { status: 200 }));
+
+      await changePassword('old-secret-1', 'brand-new-pass');
+
+      const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+      expect(url).toBe('/api/identity/auth/password/change');
+      expect(init.method).toBe('POST');
+      expect(init.body).toBe(
+        JSON.stringify({
+          currentPassword: 'old-secret-1',
+          newPassword: 'brand-new-pass',
+        }),
+      );
+    });
+
+    it('carries the typed server verdict back to the caller', async () => {
+      fetchMock.mockResolvedValue(
+        jsonResponse({ statusCode: 401, code: 'AUTH_INVALID', message: '' }, 401),
+      );
+
+      await expect(changePassword('wrong-one', 'brand-new-pass')).rejects
+        .toMatchObject({ status: 401, code: 'AUTH_INVALID' });
     });
   });
 });

@@ -1,12 +1,18 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { id } from './i18n/id';
 import { I18nProvider } from './i18n/provider';
 import type { AlertProjection } from './services/alerts';
 import { SessionContext, type SessionValue } from './services/session';
 import HrdLayout from './HrdLayout';
+
+/** Exposes the current pathname so navigation can be asserted in place. */
+function LocationProbe() {
+  const location = useLocation();
+  return <span data-testid="location-path">{location.pathname}</span>;
+}
 
 function makeSession(): SessionValue {
   return {
@@ -23,6 +29,7 @@ function renderLayout(value: SessionValue = makeSession()) {
     <SessionContext.Provider value={value}>
       <I18nProvider>
         <MemoryRouter initialEntries={['/karyawan']}>
+          <LocationProbe />
           <HrdLayout />
         </MemoryRouter>
       </I18nProvider>
@@ -74,12 +81,18 @@ describe('HrdLayout', () => {
     expect(bannerRegion.children.length).toBe(0);
   });
 
-  it('shows the Karyawan and Absensi links in the desktop navigation row', () => {
+  it('shows the Karyawan, Akun HR, Persetujuan HR and Absensi links in the desktop navigation row', () => {
     renderLayout();
 
     const desktopNav = screen.getByTestId('nav-desktop');
     expect(
       within(desktopNav).getByRole('link', { name: id['nav.karyawan'] }),
+    ).toBeTruthy();
+    expect(
+      within(desktopNav).getByRole('link', { name: id['nav.hr'] }),
+    ).toBeTruthy();
+    expect(
+      within(desktopNav).getByRole('link', { name: id['nav.hrApprovals'] }),
     ).toBeTruthy();
     expect(
       within(desktopNav).getByRole('link', { name: id['nav.absensi'] }),
@@ -106,6 +119,12 @@ describe('HrdLayout', () => {
     const mobileNav = screen.getByTestId('nav-mobile');
     expect(
       within(mobileNav).getByRole('link', { name: id['nav.karyawan'] }),
+    ).toBeTruthy();
+    expect(
+      within(mobileNav).getByRole('link', { name: id['nav.hr'] }),
+    ).toBeTruthy();
+    expect(
+      within(mobileNav).getByRole('link', { name: id['nav.hrApprovals'] }),
     ).toBeTruthy();
     expect(
       within(mobileNav).getByRole('link', { name: id['nav.absensi'] }),
@@ -169,5 +188,36 @@ describe('HrdLayout', () => {
     await user.click(screen.getByTestId('shell-sign-out'));
 
     expect(logout).toHaveBeenCalledTimes(1);
+  });
+
+  it('offers change password in the header and routes to the page', async () => {
+    const user = userEvent.setup();
+    renderLayout();
+
+    const button = screen.getByTestId('shell-change-password');
+    expect(button).toHaveTextContent(id['shell.changePassword']);
+
+    await user.click(button);
+
+    expect(screen.getByTestId('location-path')).toHaveTextContent(
+      /^\/ganti-sandi$/,
+    );
+  });
+
+  it('offers change password inside the mobile menu and closes it on use', async () => {
+    const user = userEvent.setup();
+    renderLayout();
+
+    await user.click(screen.getByTestId('nav-toggle'));
+    const mobileNav = screen.getByTestId('nav-mobile');
+    const button = within(mobileNav).getByTestId('nav-change-password');
+    expect(button).toHaveTextContent(id['shell.changePassword']);
+
+    await user.click(button);
+
+    expect(screen.getByTestId('location-path')).toHaveTextContent(
+      /^\/ganti-sandi$/,
+    );
+    expect(screen.queryByTestId('nav-mobile')).toBeNull();
   });
 });

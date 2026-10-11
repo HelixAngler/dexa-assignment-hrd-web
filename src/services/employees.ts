@@ -1,10 +1,13 @@
-import { apiFetch } from './api';
+import { ApiError, apiFetch } from './api';
 
 /** Base path of the identity API on the same origin. */
 export const IDENTITY_BASE = '/api/identity';
 
 /** Lifecycle flag of an employee row. */
 export type EmployeeStatus = 'active' | 'deactivated';
+
+/** Access role of an employee row; only `hrd` accounts run the HR console. */
+export type EmployeeRole = 'employee' | 'hrd';
 
 /** Row shape returned by the employee list. */
 export interface EmployeeSummary {
@@ -13,6 +16,7 @@ export interface EmployeeSummary {
   email: string;
   position: string;
   status: EmployeeStatus;
+  role: EmployeeRole;
 }
 
 /** Fields a create request carries; nothing about passwords is sent. */
@@ -44,6 +48,11 @@ export interface EmployeeResetResult {
   temporaryPassword: string;
 }
 
+/** One loaded row: the directory columns plus the phone the edit form shows. */
+export interface EmployeeRecord extends EmployeeSummary {
+  phone: string;
+}
+
 /** Keeps the status literal safe when the server adds an unknown value. */
 function asStatus(value: unknown): EmployeeStatus {
   return value === 'deactivated' ? 'deactivated' : 'active';
@@ -60,6 +69,9 @@ function asSummary(row: unknown): EmployeeSummary {
     email: typeof record.email === 'string' ? record.email : '',
     position: typeof record.position === 'string' ? record.position : '',
     status: asStatus(record.status),
+    // A server that does not report a role yet yields `employee`, so any UI
+    // gated on HR standing never treats an unconfirmed row as an HR account.
+    role: record.role === 'hrd' ? 'hrd' : 'employee',
   };
 }
 
@@ -136,13 +148,46 @@ export async function resetEmployeePassword(
 }
 
 /**
- * Loads one employee by id for the edit screen. The API exposes no
- * single-row route, so the row is looked up inside the list response and a
- * missing id resolves to `null` instead of an error.
+ * Loads one employee by id from the directory answer. The list response
+ * already carries every row, so one request serves any id and a missing one
+ * resolves to `null` instead of an error; a screen that needs the phone
+ * number asks {@link fetchEmployeeRecord} instead.
  */
 export async function fetchEmployeeById(
   id: string,
 ): Promise<EmployeeSummary | null> {
   const rows = await listEmployees();
   return rows.find((row) => row.id === id) ?? null;
+}
+
+/**
+ * Loads one employee from the single-record route, phone included, for the
+ * screens that edit a row. A `404` is resolved against the directory before
+ * it is reported: an id nobody carries and a server build that does not serve
+ * the single-record route both answer `404`, and only the directory can tell
+ * the two apart, so a record that exists must never be shown as gone. Any
+ * other failure still rejects, because the screen offers a retry for those.
+ */
+export async function fetchEmployeeRecord(
+  id: string,
+): Promise<EmployeeRecord | null> {
+  try {
+    const body = await apiFetch<unknown>(
+      `${IDENTITY_BASE}/employees/${encodeURIComponent(id)}`,
+    );
+    if (typeof body !== 'object' || body === null) {
+      return null;
+    }
+    const row = body as Record<string, unknown>;
+    return {
+      ...asSummary(row),
+      phone: typeof row.phone === 'string' ? row.phone : '',
+    };
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) {
+      const found = await fetchEmployeeById(id);
+      return found === null ? null : { ...found, phone: '' };
+    }
+    throw error;
+  }
 }
